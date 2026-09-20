@@ -1,11 +1,22 @@
 @import 'tailwindcss';
 
+/* CLEAN SLATE: an LSPD evidence terminal someone broke into, lit like Vice City at dusk.
+   Every colour below is original; no Rockstar artwork, fonts or logos. */
 @theme {
   --color-bg: #07090c;
+  --color-night: #0b0418;
+  --color-plum: #1a0833;
   --color-sys: #7ce8d2;
   --color-warn: #efb675;
-  --color-breach: #e5484d;
+  --color-breach: #ff3b4e;
+  --color-pink: #ff2d95;
+  --color-neon: #2de2e6;
+  --color-sun: #ff9a3c;
+  --color-gold: #ffd166;
+  --color-siren-blue: #3b6bff;
   --font-mono: ui-monospace, 'DejaVu Sans Mono', Consolas, 'Liberation Mono', monospace;
+  --font-display:
+    Impact, 'Arial Narrow Bold', 'Franklin Gothic Heavy', 'Helvetica Neue', Arial, sans-serif;
 }
 
 html,
@@ -18,4 +29,321 @@ body {
   background: var(--color-bg);
   color: #e4e7e8;
   font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+/* ---------- type ---------- */
+.font-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.neon-pink {
+  color: #ffd6ec;
+  text-shadow:
+    0 0 4px #ff8ac8,
+    0 0 14px var(--color-pink),
+    0 0 34px var(--color-pink),
+    0 0 70px rgba(255, 45, 149, 0.55);
+}
+.neon-cyan {
+  color: #d9ffff;
+  text-shadow:
+    0 0 4px #9ff6f8,
+    0 0 14px var(--color-neon),
+    0 0 34px var(--color-neon),
+    0 0 70px rgba(45, 226, 230, 0.5);
+}
+.neon-sun {
+  color: #fff1d6;
+  text-shadow:
+    0 0 4px #ffd08a,
+    0 0 16px var(--color-sun),
+    0 0 40px rgba(255, 154, 60, 0.6);
+}
+.glow-cyan {
+  text-shadow: 0 0 10px rgba(124, 232, 210, 0.55);
+}
+.glow-pink {
+  text-shadow: 0 0 10px rgba(255, 45, 149, 0.6);
+}
+
+/* Chromatic-aberration glitch: two offset copies flicker in and out around the real text. */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.85;
+  mix-blend-mode: screen;
+}
+.glitch::before {
+  color: var(--color-neon);
+  animation: glitch-a 3.6s infinite steps(1);
+}
+.glitch::after {
+  color: var(--color-pink);
+  animation: glitch-b 3.6s infinite steps(1);
+}
+@keyframes glitch-a {
+  0%,
+  90%,
+  100% {
+    transform: translate(0);
+    clip-path: inset(0 0 100% 0);
+  }
+  91% {
+    transform: translate(-6px, 1px);
+    clip-path: inset(12% 0 58% 0);
+  }
+  94% {
+    transform: translate(5px, -2px);
+    clip-path: inset(62% 0 8% 0);
+  }
+  97% {
+    transform: translate(-3px, 0);
+    clip-path: inset(30% 0 40% 0);
+  }
+}
+@keyframes glitch-b {
+  0%,
+  90%,
+  100% {
+    transform: translate(0);
+    clip-path: inset(100% 0 0 0);
+  }
+  92% {
+    transform: translate(6px, -1px);
+    clip-path: inset(48% 0 22% 0);
+  }
+  95% {
+    transform: translate(-5px, 2px);
+    clip-path: inset(6% 0 70% 0);
+  }
+  98% {
+    transform: translate(3px, 0);
+    clip-path: inset(74% 0 4% 0);
+  }
+}
+
+/* ---------- ambient motion ---------- */
+.crt {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  animation: crt-flicker 6s infinite;
+}
+.crt::after {
+  /* slow rolling bright band, like a refresh line drifting down the tube */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 22vh;
+  top: -22vh;
+  background: linear-gradient(to bottom, transparent, rgba(124, 232, 210, 0.05), transparent);
+  animation: crt-roll 9s linear infinite;
+}
+@keyframes crt-roll {
+  to {
+    transform: translateY(150vh);
+  }
+}
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 0.94;
+  }
+  48% {
+    opacity: 1;
+  }
+  73% {
+    opacity: 0.97;
+  }
+}
+
+@keyframes grid-scroll {
+  to {
+    background-position: 0 64px;
+  }
+}
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-2.2deg);
+  }
+  50% {
+    transform: rotate(2.6deg);
+  }
+}
+@keyframes sun-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 28px rgba(255, 90, 140, 0.55));
+  }
+  50% {
+    filter: drop-shadow(0 0 60px rgba(255, 150, 80, 0.85));
+  }
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes siren-red {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.08;
+  }
+}
+@keyframes siren-blue {
+  0%,
+  45% {
+    opacity: 0.08;
+  }
+  50%,
+  95% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.08;
+  }
+}
+@keyframes draw-on {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes blip {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes star-glint {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(255, 209, 102, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(255, 209, 102, 1)) brightness(1.25);
+  }
+}
+
+.caret::after {
+  content: '\2588';
+  margin-left: 2px;
+  animation: caret 1s infinite;
+}
+.blip {
+  animation: blip 1.1s infinite;
+}
+
+/* The editor is stock third-party UI: give it a neon bezel instead of restyling it. */
+.bezel {
+  position: relative;
+  background: #050609;
+  outline: 1px solid rgba(45, 226, 230, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(255, 45, 149, 0.25),
+    0 0 30px rgba(255, 45, 149, 0.18),
+    inset 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt,
+  .crt::after,
+  .glitch::before,
+  .glitch::after,
+  .caret::after,
+  .blip {
+    animation: none !important;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes fill-flash {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.38;
+  }
+  100% {
+    opacity: 0.07;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-6px, 3px);
+  }
+  40% {
+    transform: translate(5px, -3px);
+  }
+  60% {
+    transform: translate(-4px, -2px);
+  }
+  80% {
+    transform: translate(4px, 3px);
+  }
+}
+.shake {
+  animation: shake 0.5s linear;
 }
