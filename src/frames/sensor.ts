@@ -1,5 +1,6 @@
 export const TAU = Math.PI * 2,
   MONO = '"DejaVu Sans Mono", Consolas, "Liberation Mono", monospace';
+
 export type Ctx = CanvasRenderingContext2D;
 export type Rect = { x: number; y: number; w: number; h: number };
 export type Paint = string | CanvasGradient | CanvasPattern;
@@ -13,6 +14,7 @@ export type Frame = {
   targets: Region[];
   seals: Region[];
 };
+
 export type SensorOpts = {
   scale?: number;
   noise?: number;
@@ -22,12 +24,14 @@ export type SensorOpts = {
   seed?: number;
   vignettePower?: number;
 };
+
 export function mk(W: number, H: number): [HTMLCanvasElement, Ctx] {
   const c = document.createElement('canvas');
   c.width = W;
   c.height = H;
   return [c, c.getContext('2d', { willReadFrequently: true })!];
 }
+
 export function rng(seed: number): () => number {
   return () => {
     seed |= 0;
@@ -37,10 +41,12 @@ export function rng(seed: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
 export function rect(x: Ctx, X: number, Y: number, W: number, H: number, color: Paint) {
   x.fillStyle = color;
   x.fillRect(X, Y, W, H);
 }
+
 export function poly(x: Ctx, pts: [number, number][], color: Paint) {
   x.beginPath();
   pts.forEach((p, i) => (i ? x.lineTo(...p) : x.moveTo(...p)));
@@ -48,6 +54,7 @@ export function poly(x: Ctx, pts: [number, number][], color: Paint) {
   x.fillStyle = color;
   x.fill();
 }
+
 export function line(x: Ctx, pts: [number, number][], color: Paint, width = 1) {
   x.beginPath();
   pts.forEach((p, i) => (i ? x.lineTo(...p) : x.moveTo(...p)));
@@ -55,12 +62,14 @@ export function line(x: Ctx, pts: [number, number][], color: Paint, width = 1) {
   x.lineWidth = width;
   x.stroke();
 }
+
 export function ellipse(x: Ctx, X: number, Y: number, RX: number, RY: number, color: Paint) {
   x.beginPath();
   x.ellipse(X, Y, RX, RY, 0, 0, TAU);
   x.fillStyle = color;
   x.fill();
 }
+
 export function grad(
   x: Ctx,
   x0: number,
@@ -73,6 +82,7 @@ export function grad(
   stops.forEach((p) => g.addColorStop(p[0], p[1]));
   return g;
 }
+
 export function glow(x: Ctx, X: number, Y: number, R: number, color: string, power = 1) {
   x.save();
   x.globalCompositeOperation = 'screen';
@@ -84,6 +94,7 @@ export function glow(x: Ctx, X: number, Y: number, R: number, color: string, pow
   x.fillRect(X - R, Y - R, R * 2, R * 2);
   x.restore();
 }
+
 export function txt(
   x: Ctx,
   s: string,
@@ -100,6 +111,7 @@ export function txt(
   x.fillStyle = color;
   x.fillText(s, X, Y);
 }
+
 export function textBox(
   x: Ctx,
   s: string,
@@ -118,6 +130,7 @@ export function textBox(
     b = Math.ceil(Y + m.actualBoundingBoxDescent);
   return { x: l, y: t, w: r - l, h: b - t };
 }
+
 export function bounds(ctx: Ctx): Rect {
   const { width: W, height: H } = ctx.canvas,
     d = ctx.getImageData(0, 0, W, H).data;
@@ -136,6 +149,7 @@ export function bounds(ctx: Ctx): Rect {
   if (r < 0) throw Error('Empty region layer');
   return { x: l, y: t, w: r - l + 1, h: b - t + 1 };
 }
+
 export function layer(x: Ctx, draw: (k: Ctx) => void): Rect {
   const [c, k] = mk(x.canvas.width, x.canvas.height);
   draw(k);
@@ -143,6 +157,7 @@ export function layer(x: Ctx, draw: (k: Ctx) => void): Rect {
   x.drawImage(c, 0, 0);
   return b;
 }
+
 export function subtract(a: Rect, b: Rect): Rect[] {
   const l = Math.max(a.x, b.x),
     t = Math.max(a.y, b.y),
@@ -156,6 +171,7 @@ export function subtract(a: Rect, b: Rect): Rect[] {
     { x: r, y: t, w: a.x + a.w - r, h: d - t },
   ].filter((q) => q.w > 0 && q.h > 0);
 }
+
 export function region(id: string, boxes: Rect | Rect[], W: number, H: number): Region {
   const arr = Array.isArray(boxes) ? boxes : [boxes];
   return {
@@ -164,6 +180,7 @@ export function region(id: string, boxes: Rect | Rect[], W: number, H: number): 
     pixelRects: arr,
   };
 }
+
 export function finish(
   c: HTMLCanvasElement,
   kind: string,
@@ -183,6 +200,7 @@ export function finish(
     seals: seals.map(([id, b]) => region(id, b, W, H)),
   };
 }
+
 export function grain(x: Ctx, W: number, H: number, amount: number) {
   const a = x.getImageData(0, 0, W, H),
     d = a.data;
@@ -195,6 +213,7 @@ export function grain(x: Ctx, W: number, H: number, amount: number) {
   }
   x.putImageData(a, 0, 0);
 }
+
 function vignette(x: Ctx, W: number, H: number, strength: number) {
   const g = x.createRadialGradient(W * 0.51, H * 0.46, H * 0.12, W * 0.5, H * 0.5, W * 0.66);
   g.addColorStop(0, '#0000');
@@ -203,6 +222,7 @@ function vignette(x: Ctx, W: number, H: number, strength: number) {
   x.fillStyle = g;
   x.fillRect(0, 0, W, H);
 }
+
 export function sensor(
   x: Ctx,
   {

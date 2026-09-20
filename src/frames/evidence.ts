@@ -18,6 +18,7 @@ import {
   sensor,
 } from './sensor';
 import type { Ctx, Rect } from './sensor';
+
 function burn(x: Ctx, s: string, X: number, Y: number, size = 19, align: CanvasTextAlign = 'left') {
   x.save();
   x.shadowColor = '#000';
@@ -27,6 +28,7 @@ function burn(x: Ctx, s: string, X: number, Y: number, size = 19, align: CanvasT
   x.restore();
   return b;
 }
+
 function neon(x: Ctx, s: string, X: number, Y: number, size: number, color: string) {
   x.save();
   x.shadowColor = color;
@@ -36,6 +38,7 @@ function neon(x: Ctx, s: string, X: number, Y: number, size: number, color: stri
   txt(x, s, X, Y, size, '#f4e9df', '700');
   x.restore();
 }
+
 function texture(x: Ctx, W: number, H: number, seed: number, n: number, opacity = 0.09) {
   const r = rng(seed);
   for (let i = 0; i < n; i++) {
@@ -44,6 +47,7 @@ function texture(x: Ctx, W: number, H: number, seed: number, n: number, opacity 
     rect(x, X, Y, 1 + r() * 3, 0.5 + r(), `rgba(175,184,176,${r() * opacity})`);
   }
 }
+
 function palm(x: Ctx, X: number, Y: number, h: number, seed = 1) {
   const r = rng(seed);
   x.save();
