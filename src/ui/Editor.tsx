@@ -49,19 +49,31 @@ type Props = {
   editorRef?: RefObject<ImageEditorRef>;
   onLoad?: (editor: ImageEditorInstance) => void;
   onSave: (result: ImageEditorSaveResult) => void;
+  onCancel?: () => void;
   onLoadError?: () => void;
   onError?: (error: Error) => void;
+  minHeight?: number | string;
 };
 
-export function Editor({ image, editorRef, onLoad, onSave, onLoadError, onError }: Props) {
+export function Editor({
+  image,
+  editorRef,
+  onLoad,
+  onSave,
+  onCancel,
+  onLoadError,
+  onError,
+  minHeight = 640,
+}: Props) {
   return (
     <ImageEditor
       ref={editorRef}
       image={image}
       options={EDITOR_OPTIONS}
-      minHeight={640}
+      minHeight={minHeight}
       onLoad={onLoad}
       onSave={onSave}
+      onCancel={onCancel}
       onLoadError={onLoadError}
       onError={onError}
     />
