@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #07090c;
+  --color-sys: #7ce8d2;
+  --color-warn: #efb675;
+  --color-breach: #e5484d;
+  --font-mono: ui-monospace, "DejaVu Sans Mono", Consolas, "Liberation Mono", monospace;
+}
+
+html, body, #root { height: 100%; }
+body { margin: 0; background: var(--color-bg); color: #e4e7e8; font-family: var(--font-mono); }

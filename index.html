@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CLEAN SLATE</title>
+    <!-- Preload Unlayer's CDN bundle so it downloads during BOOT, not on first Edit. -->
+    <script src="https://cdn.unlayer.com/image-editor/embed.js"></script>
+    <script>window.ImageEditor?.load?.().catch(()=>{});</script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
