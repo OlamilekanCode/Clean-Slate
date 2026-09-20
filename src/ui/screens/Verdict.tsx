@@ -33,7 +33,6 @@ export default function Verdict({
 }: Props) {
   const copy = VERDICT_COPY[ending.kind];
   const tone = TONE[ending.kind];
-  const letters = copy.title.split('');
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -56,31 +55,48 @@ export default function Verdict({
             {timedOut ? 'CLOCK EXPIRED · ' : ''}CASE 26-4471 · VERDICT
           </div>
           <h1
-            className={`font-display glitch text-[clamp(52px,11vw,150px)] leading-[0.92] ${tone.cls}`}
+            className={`font-display glitch leading-[0.92] ${tone.cls}`}
             data-text={copy.title}
+            style={{
+              fontSize: `clamp(40px, ${copy.title.length > 12 ? 7.2 : 11}vw, ${copy.title.length > 12 ? 108 : 150}px)`,
+            }}
           >
-            {letters.map((c, i) => (
-              <motion.span
-                key={i}
-                className="inline-block"
-                initial={{ y: 60, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{
-                  delay: 0.15 + i * 0.045,
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 16,
-                }}
-              >
-                {c === ' ' ? ' ' : c}
-              </motion.span>
-            ))}
+            {(() => {
+              // Words stay whole (no mid-word wrapping); letters still animate in one by one.
+              let n = 0;
+              return copy.title.split(' ').map((word, w) => (
+                <span key={w} className="inline-block whitespace-nowrap">
+                  {word.split('').map((c) => {
+                    const i = n++;
+                    return (
+                      <motion.span
+                        key={i}
+                        className="inline-block"
+                        initial={{ y: 60, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{
+                          delay: 0.15 + i * 0.045,
+                          type: 'spring',
+                          stiffness: 300,
+                          damping: 16,
+                        }}
+                      >
+                        {c}
+                      </motion.span>
+                    );
+                  })}
+                  {w < copy.title.split(' ').length - 1 && (
+                    <span className="inline-block w-[0.28em]" />
+                  )}
+                </span>
+              ));
+            })()}
           </h1>
         </motion.div>
 
         {/* wanted stars */}
         <motion.div
-          className="flex flex-col items-center gap-1"
+          className="flex flex-col items-center gap-1 bg-black/45 px-8 py-3 backdrop-blur-sm"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
@@ -91,7 +107,7 @@ export default function Verdict({
           </div>
         </motion.div>
 
-        <div className="max-w-[720px] text-center">
+        <div className="max-w-[720px] bg-black/45 px-6 py-3 text-center backdrop-blur-sm">
           <div className="font-display text-2xl text-white">
             <Typed text={copy.sub} speed={26} delay={1300} cursor={false} />
           </div>

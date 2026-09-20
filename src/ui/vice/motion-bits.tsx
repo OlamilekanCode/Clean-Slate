@@ -110,7 +110,7 @@ export function WantedStars({
               <path
                 d="M12 1.8l3.1 6.6 7.2.9-5.3 5 1.4 7.2L12 17.9l-6.4 3.6L7 14.3 1.7 9.3l7.2-.9z"
                 fill="none"
-                stroke="rgba(255,255,255,0.22)"
+                stroke="rgba(255,255,255,0.42)"
                 strokeWidth="1.2"
               />
             </svg>
