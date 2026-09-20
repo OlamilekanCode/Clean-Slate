@@ -1,3 +1,6 @@
+import Tracer from './ui/Tracer';
+
+// Tracer bullet: the game shell replaces this once the editor -> save -> score pipeline is proven.
 export default function App() {
-  return <div className="p-4 text-sys">CLEAN SLATE</div>;
+  return <Tracer />;
 }
