@@ -9,16 +9,28 @@ identify them: a CCTV still, a traffic-camera capture, a police report, a news b
 photo. The [React Image Editor](https://github.com/unlayer/react-image-editor) is the game: every move the
 player makes is an edit in the editor, and the score comes from measuring exactly which pixels they changed.
 
-> **Status: work in progress.** The evidence generators, the editor integration, the pixel scoring, the
-> calibration and the game logic (heat, suspicion, endings) are built and tested. The playable game
-> screens (boot, brief, edit, analysis, verdict) and the deployment are **not built yet**. `npm run dev`
-> currently opens the calibration harness shown below, not the finished game.
+> **Status: playable.** The full loop works end to end in a real browser: boot, briefing, editing with the
+> clock, forensic analysis and verdict, across three exhibits (CCTV, traffic camera, witness photo), with all
+> four endings. Still to do: the police report and news broadcast in the run, and a public deployment.
 
-![The editor with a redaction over the face, saved and scored](docs/screenshots/editor-redaction.jpg)
+<table>
+  <tr>
+    <td><img src="docs/screenshots/game-1-boot.jpg" alt="Boot screen"><br><sub>Boot: trip the alarm to start the clock</sub></td>
+    <td><img src="docs/screenshots/game-2-brief.jpg" alt="Briefing"><br><sub>Brief: what to conceal, what to leave alone</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/game-3-edit.jpg" alt="Editing in the React Image Editor"><br><sub>Edit: the React Image Editor is the game</sub></td>
+    <td><img src="docs/screenshots/game-4-analysis.jpg" alt="Forensic analysis"><br><sub>Analysis: every region's cost or saving, and the linked car</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/game-5-verdict-clean-slate.jpg" alt="Verdict: clean slate"><br><sub>Verdict: CLEAN SLATE</sub></td>
+    <td><img src="docs/screenshots/game-6-verdict-tampering.jpg" alt="Verdict: tampering charge"><br><sub>Verdict: TAMPERING CHARGE</sub></td>
+  </tr>
+</table>
 
-_The React Image Editor docked inside the terminal, after a black rectangle was dragged over the suspect's
-face and committed. The panel on the right is the scorer's readout for that saved file: the `face` target is
-88% changed, both integrity seals are untouched._
+The look is Vice City at dusk over a police terminal: neon type with a glitch, a striped sun, palms and skyline,
+a scrolling grid, CRT scanlines, siren lights when the clock or the risk gets dangerous, and a wanted-stars HUD
+that tracks heat. All of it is vector art and CSS drawn in code, so there are no image assets.
 
 ## The idea
 
@@ -59,6 +71,12 @@ The editor is not decoration; the whole game reads its output.
   ever falls forward to a different build.
 
 ### What testing the editor turned up
+
+![The calibration harness: a redaction over the face, saved through the editor and scored](docs/screenshots/editor-redaction.jpg)
+
+_The calibration harness (`?tracer`) after a black rectangle was dragged over the suspect's face and committed.
+The panel is the scorer's readout for that saved file: the `face` target is 88% changed, both integrity seals
+are untouched._
 
 - **`onSave` returns JPEG, not PNG.** An untouched save is therefore not pixel-identical to the input, and
   the noise differs by frame: the crisp broadcast graphics ring hardest.
@@ -118,13 +136,17 @@ A save and a timeout can never score an exhibit twice, and a save already in fli
 
 ```bash
 npm install
-npm run dev      # the calibration harness at http://localhost:5173
-npm test         # 37 tests for the game logic, no browser needed
+npm run dev      # the game at http://localhost:5173
+npm test         # 42 tests for the game logic, no browser needed
 npm run build    # typecheck and production build
 ```
 
-Open `/?frame=1` to `/?frame=5` to load a specific exhibit in the harness, press **COMMIT TO FILE** with no
-edits to measure the export noise for that frame, or draw an edit and read the per-region coverage.
+Handy URLs while developing:
+
+- `/?clock=15` shortens the five-minute clock to 15 seconds, to see the timeout ending.
+- `/?tracer` opens the calibration harness. `/?frame=1` to `/?frame=5` loads a specific exhibit in it: press
+  **COMMIT TO FILE** with no edits to measure the export noise for that frame, or draw an edit and read the
+  per-region coverage.
 
 ## Project layout
 
@@ -140,17 +162,23 @@ src/
              game.test.ts             tests for the budget, the chain, suspicion, endings, exactly-once
   ui/        Editor.tsx               the editor wrapper with module-scope options
              preloadEditor.ts         pinned, early load of the editor bundle
+             Chrome.tsx               the HUD: exhibit counter, clock, wanted stars, tampering risk
+             Outlines.tsx             region outlines drawn over an exhibit
+             copy.ts                  the handler's text
+             screens/                 Boot, Brief, Edit, Analysis, Verdict
+             vice/                    the Vice City backdrop, glitch, stars, sirens, wipe, typing
              Tracer.tsx               the calibration harness
 ```
 
-Built with Vite, React 18, TypeScript and Tailwind v4, with `@unlayer/react-image-editor` for editing. It is
-entirely client-side: no backend, no database.
+Built with Vite, React 18, TypeScript and Tailwind v4, with `@unlayer/react-image-editor` for editing and
+`motion` for the animation. It is entirely client-side: no backend, no database.
 
 ## Roadmap
 
-- [ ] Game screens wired to the state machine: boot, brief, edit with the clock, analysis, verdict
-- [ ] Analysis screen that draws each region's outline and says what it cost or saved
-- [ ] Police report and news broadcast calibrated and added to the run
+- [x] Evidence generators, editor integration, pixel scoring and calibration
+- [x] Game state machine with heat, suspicion, the car chain and all four endings
+- [x] Game screens: boot, brief, edit with the clock, analysis, verdict
+- [ ] Police report and news broadcast added to the run (calibrate their thresholds first)
 - [ ] Deployed build and a short capture
 
 ## Disclaimer
