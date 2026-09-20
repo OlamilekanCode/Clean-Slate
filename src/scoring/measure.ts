@@ -1,5 +1,6 @@
 import type { Frame } from '../frames/sensor';
-import { MATERIAL, deltaMap, diffMask, toPixels } from './diff';
+import { MATERIAL } from './calibration';
+import { deltaMap, diffMask, toPixels } from './diff';
 import { coverage } from './score';
 
 /** Thresholds probed when measuring the export noise floor. */

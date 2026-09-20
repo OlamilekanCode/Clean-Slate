@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ImageEditorRef } from '@unlayer/react-image-editor';
 import { GENS } from '../frames/evidence';
+import { UNTOUCHED_FLOOR } from '../scoring/calibration';
 import { measure } from '../scoring/measure';
 import type { Measurement } from '../scoring/measure';
 import { syntheticSave } from '../scoring/selftest';
@@ -106,7 +107,10 @@ export default function Tracer() {
               {e.m.sameSize ? '' : ' (SIZE DIFFERS)'} · {(e.m.bytes / 1e6).toFixed(2)} MB
               {e.m.identicalString ? ' · byte-identical string' : ''}
             </p>
-            <p>max delta {e.m.maxDelta}</p>
+            <p>
+              max delta {e.m.maxDelta} · untouched floor for this exhibit{' '}
+              {UNTOUCHED_FLOOR[FRAME_INDEX]}
+            </p>
             <p className="text-[#829092]">
               px over threshold:{' '}
               {Object.entries(e.m.overThreshold)

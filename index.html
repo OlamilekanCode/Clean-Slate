@@ -4,11 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CLEAN SLATE</title>
-    <!-- Preload Unlayer's CDN bundle so it downloads during BOOT, not on first Edit. -->
+    <!-- Unlayer's loader. main.tsx calls preloadEditor(), which pins the editor version and starts the download at boot. -->
     <script src="https://cdn.unlayer.com/image-editor/embed.js"></script>
-    <script>
-      window.ImageEditor?.load?.().catch(() => {});
-    </script>
   </head>
   <body>
     <div id="root"></div>
