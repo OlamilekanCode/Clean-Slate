@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ImageEditorRef } from '@unlayer/react-image-editor';
 import { GENS } from '../frames/evidence';
-import { UNTOUCHED_FLOOR, materialFor } from '../scoring/calibration';
+import { EXHIBIT_ORDER, UNTOUCHED_FLOOR, materialFor } from '../scoring/calibration';
 import { measure } from '../scoring/measure';
 import type { Measurement } from '../scoring/measure';
 import { syntheticSave } from '../scoring/selftest';
@@ -16,6 +16,7 @@ const FRAME_INDEX =
     GENS.length,
     Math.max(1, Number(new URLSearchParams(location.search).get('frame')) || 1),
   ) - 1;
+const EXHIBIT = EXHIBIT_ORDER[FRAME_INDEX];
 
 const pct = (n: number) => (n * 100).toFixed(1) + '%';
 
@@ -37,7 +38,7 @@ export default function Tracer() {
   const runSynthetic = async (kind: SyntheticKind) => {
     push(
       `synthetic: ${kind}`,
-      await measure(frame, await syntheticSave(frame, kind), materialFor(FRAME_INDEX)),
+      await measure(frame, await syntheticSave(frame, kind), materialFor(EXHIBIT)),
     );
   };
 
@@ -56,7 +57,7 @@ export default function Tracer() {
           onError={(e) => setError(e.message)}
           onSave={async ({ dataUrl }) => {
             console.info('[tracer] onSave prefix:', dataUrl.slice(0, 30));
-            push('editor onSave', await measure(frame, dataUrl, materialFor(FRAME_INDEX)));
+            push('editor onSave', await measure(frame, dataUrl, materialFor(EXHIBIT)));
           }}
         />
       </div>
@@ -96,8 +97,7 @@ export default function Tracer() {
             className="col-span-2 border border-[#334244] p-2 text-left hover:border-sys"
             onClick={async () => {
               const img = editorRef.current?.editor?.getImage();
-              if (img)
-                push('editor getImage()', await measure(frame, img, materialFor(FRAME_INDEX)));
+              if (img) push('editor getImage()', await measure(frame, img, materialFor(EXHIBIT)));
             }}
           >
             editor.getImage() — untouched canvas
@@ -112,8 +112,7 @@ export default function Tracer() {
               {e.m.identicalString ? ' · byte-identical string' : ''}
             </p>
             <p>
-              max delta {e.m.maxDelta} · untouched floor for this exhibit{' '}
-              {UNTOUCHED_FLOOR[FRAME_INDEX]}
+              max delta {e.m.maxDelta} · untouched floor for this exhibit {UNTOUCHED_FLOOR[EXHIBIT]}
             </p>
             <p className="text-[#829092]">
               px over threshold:{' '}
