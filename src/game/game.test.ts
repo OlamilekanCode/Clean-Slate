@@ -10,6 +10,7 @@ import {
 import {
   EXHIBITS,
   SHIPPED,
+  SLICE,
   isChainActive,
   normalisedWeights,
   scoreExhibit,
@@ -70,7 +71,7 @@ function edit(s: GameState, coverage: ExhibitCoverage): GameState {
   ].reduce((acc, a) => reducer(acc, a as Action), s);
 }
 const next = (s: GameState) => reducer(s, { type: 'NEXT' });
-const boot = () => reducer(initialState(), { type: 'BOOT_DONE' });
+const boot = () => reducer(initialState(SLICE), { type: 'BOOT_DONE' });
 
 /** A perfect run on the slice: every target fully covered, no seal touched. */
 function perfectRun(): GameState {
@@ -82,7 +83,7 @@ function perfectRun(): GameState {
 
 describe('heat budget', () => {
   it('normalises the shipped slice to 100 and moves the car to 22.41', () => {
-    const w = normalisedWeights(SHIPPED);
+    const w = normalisedWeights(SLICE);
     near(
       Object.values(w).reduce((a, b) => a + b, 0),
       100,
@@ -145,7 +146,7 @@ describe('credit', () => {
     const bodyOnly = cov('witness', { 'red-car': [1, 1, 1, 1, 0] });
     const both = cov('witness', { 'red-car': FULL_CAR });
     const credit = (c: ExhibitCoverage) =>
-      scoreExhibit(SHIPPED, 'witness', c, 22.41).targets[0].credit;
+      scoreExhibit(SLICE, 'witness', c, 22.41).targets[0].credit;
     assert.equal(credit(plateOnly), 0);
     assert.equal(credit(bodyOnly), 0);
     assert.equal(credit(both), 1);
@@ -154,7 +155,7 @@ describe('credit', () => {
 
 describe('the car chain', () => {
   it('detects when both ends ship', () => {
-    assert.equal(isChainActive(SHIPPED), true);
+    assert.equal(isChainActive(SLICE), true);
     assert.equal(isChainActive(['cctv', 'anpr']), false);
   });
 
@@ -225,20 +226,20 @@ describe('suspicion', () => {
   it('charges a seal once, however many of its rects pass the line', () => {
     const twoRects = [part(0.3), part(0.4)];
     assert.equal(sealBreached(twoRects), true);
-    const r = scoreExhibit(SHIPPED, 'cctv', cov('cctv', {}, { timecode: [0.3, 0.4] }), 0);
+    const r = scoreExhibit(SLICE, 'cctv', cov('cctv', {}, { timecode: [0.3, 0.4] }), 0);
     assert.deepEqual(r.breached, ['timecode']);
     assert.equal(r.suspicionAdded, BREACH_SUSPICION);
   });
 
   it('charges each breached seal once, and ignores a nick under the line', () => {
     const two = scoreExhibit(
-      SHIPPED,
+      SLICE,
       'cctv',
       cov('cctv', {}, { timecode: 0.4, 'camera-id': 0.4 }),
       0,
     );
     assert.equal(two.suspicionAdded, 60);
-    const nick = scoreExhibit(SHIPPED, 'cctv', cov('cctv', {}, { timecode: 0.03 }), 0);
+    const nick = scoreExhibit(SLICE, 'cctv', cov('cctv', {}, { timecode: 0.03 }), 0);
     assert.equal(nick.suspicionAdded, 0);
     assert.equal(
       sealBreached([part(0.05)]),
@@ -250,7 +251,7 @@ describe('suspicion', () => {
   it('charges collateral only beyond 30%, at 150 per unit', () => {
     assert.equal(collateralSuspicion(0.3), 0);
     near(collateralSuspicion(0.4), 15);
-    const r = scoreExhibit(SHIPPED, 'cctv', cov('cctv', {}, {}, 0.5), 0);
+    const r = scoreExhibit(SLICE, 'cctv', cov('cctv', {}, {}, 0.5), 0);
     near(r.suspicionAdded, 30);
   });
 
@@ -397,7 +398,7 @@ describe('save and timeout resolve exactly once', () => {
 
   it('does not repeat an exhibit after the run restarts', () => {
     const s = reducer(perfectRun(), { type: 'RESTART' });
-    assert.deepEqual(s, initialState());
+    assert.deepEqual(s, initialState(SLICE));
   });
 });
 
@@ -443,7 +444,7 @@ describe('skip and failed saves', () => {
   });
 
   it('keeps a custom clock length across a restart', () => {
-    const s = reducer(initialState(SHIPPED, 12_000), { type: 'RESTART' });
+    const s = reducer(initialState(SLICE, 12_000), { type: 'RESTART' });
     assert.equal(s.clockMs, 12_000);
   });
 });
@@ -490,5 +491,77 @@ describe('load-time frame checks', () => {
     const f = good();
     f.anpr.seals[0].id = 'renamed';
     assert.match(validateFrames(f).join(), /anpr: seals \[renamed,unit-id\] do not match/);
+  });
+});
+
+describe('the full five-exhibit run', () => {
+  const boot5 = () => reducer(initialState(SHIPPED), { type: 'BOOT_DONE' });
+  const perfectFive = () => {
+    let s = boot5();
+    s = next(edit(s, cov('cctv', { face: 1, jacket: 1 })));
+    s = next(edit(s, cov('anpr', { plate: 1, 'red-car': 1 })));
+    s = next(edit(s, cov('report', { 'suspect-name': 1, 'vehicle-line': 1 })));
+    s = next(edit(s, cov('broadcast', { 'headline-name': 1, 'strap-vehicle': 1 })));
+    return next(edit(s, cov('witness', { 'red-car': FULL_CAR })));
+  };
+
+  it('plays all five in order with the witness photo last', () => {
+    assert.deepEqual([...SHIPPED], ['cctv', 'anpr', 'report', 'broadcast', 'witness']);
+  });
+
+  it('uses the raw weights directly, so the car moves 13 heat', () => {
+    const w = normalisedWeights(SHIPPED);
+    near(
+      Object.values(w).reduce((a, b) => a + b, 0),
+      100,
+      1e-9,
+    );
+    near(w[targetKey('anpr', 'red-car')], 13);
+    near(w[targetKey('broadcast', 'headline-name')], 15);
+    let s = boot5();
+    s = next(edit(s, cov('cctv')));
+    s = edit(s, cov('anpr', { 'red-car': 1 }));
+    near(transferredToWitness(s.results), 13);
+  });
+
+  it('reaches zero heat and CLEAN SLATE on a perfect run', () => {
+    const s = perfectFive();
+    assert.equal(s.phase, 'VERDICT');
+    near(heatOf(s.results), 0, 1e-9);
+    assert.equal(s.ending?.kind, 'CLEAN_SLATE');
+    assert.equal(Object.keys(s.results).length, 5);
+  });
+
+  it('keeps the transferred car heat when only the witness photo is left alone', () => {
+    let s = boot5();
+    s = next(edit(s, cov('cctv', { face: 1, jacket: 1 })));
+    s = next(edit(s, cov('anpr', { plate: 1, 'red-car': 1 })));
+    s = next(edit(s, cov('report', { 'suspect-name': 1, 'vehicle-line': 1 })));
+    s = next(edit(s, cov('broadcast', { 'headline-name': 1, 'strap-vehicle': 1 })));
+    s = next(edit(s, cov('witness')));
+    near(heatOf(s.results), 13);
+    assert.equal(s.ending?.kind, 'PARTIAL');
+  });
+
+  it('syncs all five unedited when the clock runs out', () => {
+    let s = boot5();
+    s = reducer(s, { type: 'START_EDIT' });
+    s = reducer(s, { type: 'EDITOR_READY' });
+    s = reducer(s, { type: 'TICK', ms: CLOCK_MS });
+    assert.equal(s.phase, 'VERDICT');
+    assert.equal(Object.keys(s.results).length, 5);
+    assert.equal(heatOf(s.results), 100);
+    assert.equal(s.ending?.kind, 'SYNCED');
+  });
+
+  it('charges seals on the new exhibits once each too', () => {
+    const r = scoreExhibit(
+      SHIPPED,
+      'broadcast',
+      cov('broadcast', {}, { 'channel-bug': 0.4, ticker: [0.3, 0.4] }),
+      0,
+    );
+    assert.deepEqual(r.breached, ['channel-bug', 'ticker']);
+    assert.equal(r.suspicionAdded, 60);
   });
 });

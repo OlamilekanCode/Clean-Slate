@@ -86,10 +86,13 @@ export const EXHIBITS: Record<ExhibitId, ExhibitSpec> = {
 };
 
 /**
- * The exhibits in play, in order. The three-item slice is the fallback product: tutorial, the multi-rect car
- * target, and the chain. Add 'report' and 'broadcast' once they are calibrated.
+ * The exhibits in play, in order. Witness photo last, so the ANPR car has been dealt with before the heat it
+ * moved there comes up. With all five shipped the raw weights total exactly 100, so the ANPR car moves 13 heat.
  */
-export const SHIPPED: readonly ExhibitId[] = ['cctv', 'anpr', 'witness'];
+export const SHIPPED: readonly ExhibitId[] = ['cctv', 'anpr', 'report', 'broadcast', 'witness'];
+
+/** The three-exhibit slice: CCTV, ANPR and the witness photo. The chain still works with it (car = 22.41). */
+export const SLICE: readonly ExhibitId[] = ['cctv', 'anpr', 'witness'];
 
 /** Hiding the car in the ANPR capture is what makes it incriminating in the witness photo. */
 export const CHAIN = {
