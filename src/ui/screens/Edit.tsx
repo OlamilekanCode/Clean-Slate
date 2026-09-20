@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, type Dispatch } from 'react';
 import type { Frame } from '../../frames/sensor';
 import { EXHIBITS, coverageFromMeasurement, type ExhibitId } from '../../game/case';
 import type { Action, GameState } from '../../game/reducer';
-import { materialFor } from '../../scoring/calibration';
+import { materialFor, sealMaterialFor } from '../../scoring/calibration';
 import { measure, type Measurement } from '../../scoring/measure';
 import { Editor } from '../Editor';
 import { HANDLER } from '../copy';
@@ -67,7 +67,7 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
       savingRef.current = true;
       dispatch({ type: 'SAVE_STARTED' });
       try {
-        const m = await measure(frame, dataUrl, materialFor(exhibit));
+        const m = await measure(frame, dataUrl, materialFor(exhibit), sealMaterialFor(exhibit));
         onSaved(exhibit, m, dataUrl);
         dispatch({ type: 'SAVE_SCORED', coverage: coverageFromMeasurement(m) });
       } catch (e) {

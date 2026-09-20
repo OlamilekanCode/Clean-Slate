@@ -34,7 +34,10 @@ export type Measurement = {
   regions: RegionReport[];
   /** Changed pixels outside every target rect, as a fraction of all pixels outside. */
   collateral: number;
+  /** Threshold used for targets and collateral. */
   material: number;
+  /** Threshold used for seals (stricter where a false breach is the risk). */
+  sealMaterial: number;
   /** Per-region cover at each candidate MATERIAL, keyed by threshold then region id. */
   sweep: Record<number, Record<string, number>>;
   /** Per-rect changed/area at each candidate MATERIAL, so group covers can be rebuilt for any threshold. */
@@ -48,11 +51,14 @@ export async function measure(
   frame: Frame,
   saved: string,
   material: number = MATERIAL,
+  sealMaterial: number = material,
 ): Promise<Measurement> {
   const { W, H } = frame;
   const [orig, next] = await Promise.all([toPixels(frame.dataUrl, W, H), toPixels(saved, W, H)]);
   const delta = deltaMap(orig.px, next.px);
   const mask = diffMask(delta, material);
+  // Seals may use a stricter threshold than targets (see SEAL_MATERIAL_BY_EXHIBIT in calibration.ts).
+  const sealMask = sealMaterial === material ? mask : diffMask(delta, sealMaterial);
 
   let maxDelta = 0;
   for (let i = 0; i < delta.length; i++) if (delta[i] > maxDelta) maxDelta = delta[i];
@@ -67,9 +73,10 @@ export async function measure(
     ...frame.targets.map((r) => ({ kind: 'target' as const, r })),
     ...frame.seals.map((r) => ({ kind: 'seal' as const, r })),
   ].map(({ kind, r }) => {
-    const c = coverage(mask, W, H, r.rects);
+    const use = kind === 'seal' ? sealMask : mask;
+    const c = coverage(use, W, H, r.rects);
     const parts = r.rects.map((rect) => {
-      const p = coverage(mask, W, H, [rect]);
+      const p = coverage(use, W, H, [rect]);
       return { changed: p.changed, area: p.area };
     });
     return { id: r.id, kind, cover: c.cover, changed: c.changed, area: c.area, parts };
@@ -120,6 +127,7 @@ export async function measure(
     regions,
     collateral,
     material,
+    sealMaterial,
     sweep,
     sweepParts,
     sweepCollateral,
