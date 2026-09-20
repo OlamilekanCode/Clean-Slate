@@ -5,6 +5,9 @@ import { coverage } from './score';
 /** Thresholds probed when measuring the export noise floor. */
 export const PROBE_THRESHOLDS = [0, 2, 4, 8, 12, 16, 24, 32, 48];
 
+/** Candidate MATERIAL values whose per-region cover is recorded, to choose a threshold from data. */
+export const SWEEP_THRESHOLDS = [24, 32, 40, 48, 64, 80];
+
 export type RegionReport = {
   id: string;
   kind: 'target' | 'seal';
@@ -29,6 +32,8 @@ export type Measurement = {
   /** Changed pixels outside every target rect, as a fraction of all pixels outside. */
   collateral: number;
   material: number;
+  /** Per-region cover at each candidate MATERIAL, keyed by threshold then region id. */
+  sweep: Record<number, Record<string, number>>;
 };
 
 /** Compare a saved image against the exact frame instance the player was given. */
@@ -55,6 +60,13 @@ export async function measure(frame: Frame, saved: string): Promise<Measurement>
     return { id: r.id, kind, cover: c.cover, changed: c.changed, area: c.area };
   });
 
+  const sweep: Record<number, Record<string, number>> = {};
+  for (const t of SWEEP_THRESHOLDS) {
+    const mt = diffMask(delta, t);
+    sweep[t] = {};
+    for (const r of [...frame.targets, ...frame.seals]) sweep[t][r.id] = coverage(mt, W, H, r.rects).cover;
+  }
+
   const all = coverage(mask, W, H, frame.targets.flatMap((t) => t.rects));
   let totalChanged = 0;
   for (let i = 0; i < mask.length; i++) totalChanged += mask[i];
@@ -73,5 +85,6 @@ export async function measure(frame: Frame, saved: string): Promise<Measurement>
     regions,
     collateral,
     material: MATERIAL,
+    sweep,
   };
 }
