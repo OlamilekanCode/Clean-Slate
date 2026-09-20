@@ -401,6 +401,53 @@ describe('save and timeout resolve exactly once', () => {
   });
 });
 
+describe('skip and failed saves', () => {
+  const ready = (s: GameState) =>
+    [{ type: 'START_EDIT' }, { type: 'EDITOR_READY' }].reduce((a, x) => reducer(a, x as Action), s);
+
+  it('syncs the exhibit unedited when skipped, and moves on to analysis', () => {
+    let s = ready(boot());
+    s = reducer(s, { type: 'SKIP' });
+    assert.equal(s.phase, 'ANALYSIS');
+    assert.equal(s.results.cctv!.unedited, true);
+    assert.equal(heatOf(s.results), 100);
+    assert.equal(suspicionOf(s.results), 0);
+  });
+
+  it('ignores a skip while a save is in flight, or once the exhibit is scored', () => {
+    let s = ready(boot());
+    s = reducer(s, { type: 'SAVE_STARTED' });
+    assert.equal(reducer(s, { type: 'SKIP' }), s);
+    s = reducer(s, { type: 'SAVE_SCORED', coverage: cov('cctv', { face: 1 }) });
+    assert.equal(reducer(s, { type: 'SKIP' }), s, 'no second score');
+  });
+
+  it('lets the player try again after a failed save', () => {
+    let s = ready(boot());
+    s = reducer(s, { type: 'SAVE_STARTED' });
+    s = reducer(s, { type: 'SAVE_FAILED' });
+    assert.equal(s.saving, false);
+    assert.equal(s.phase, 'EDIT');
+    s = reducer(s, { type: 'SAVE_STARTED' });
+    s = reducer(s, { type: 'SAVE_SCORED', coverage: cov('cctv', { face: 1 }) });
+    assert.equal(s.phase, 'ANALYSIS');
+  });
+
+  it('ends the run if the clock ran out during a save that then failed', () => {
+    let s = ready(boot());
+    s = reducer(s, { type: 'SAVE_STARTED' });
+    s = reducer(s, { type: 'TICK', ms: CLOCK_MS });
+    s = reducer(s, { type: 'SAVE_FAILED' });
+    assert.equal(s.phase, 'VERDICT');
+    assert.equal(Object.keys(s.results).length, 3);
+  });
+
+  it('keeps a custom clock length across a restart', () => {
+    const s = reducer(initialState(SHIPPED, 12_000), { type: 'RESTART' });
+    assert.equal(s.clockMs, 12_000);
+  });
+});
+
 describe('load-time frame checks', () => {
   const r = (x: number, w = 0.1) => ({ x, y: 0, w, h: 0.1 });
   const good = () => ({

@@ -24,6 +24,8 @@ export type GameState = {
   /** Position in `shipped` of the exhibit being briefed, edited or analysed. */
   index: number;
   clockMs: number;
+  /** The clock's starting value, kept so RESTART can reset it (a short clock is handy for testing). */
+  clockTotalMs: number;
   /** True once the editor is loaded AND the image is mounted. The clock never runs before this. */
   editorReady: boolean;
   /** True from the moment a save starts until its score arrives. */
@@ -41,15 +43,23 @@ export type Action =
   | { type: 'TICK'; ms: number }
   | { type: 'SAVE_STARTED' }
   | { type: 'SAVE_SCORED'; coverage: ExhibitCoverage }
+  /** The save could not be read back (e.g. the image failed to decode). The player may try again. */
+  | { type: 'SAVE_FAILED' }
+  /** Leave this exhibit as it is: it syncs unedited. */
+  | { type: 'SKIP' }
   | { type: 'NEXT' }
   | { type: 'RESTART' };
 
-export function initialState(shipped: readonly ExhibitId[] = SHIPPED): GameState {
+export function initialState(
+  shipped: readonly ExhibitId[] = SHIPPED,
+  clockMs: number = CLOCK_MS,
+): GameState {
   return {
     phase: 'BOOT',
     shipped,
     index: 0,
-    clockMs: CLOCK_MS,
+    clockMs,
+    clockTotalMs: clockMs,
     editorReady: false,
     saving: false,
     timedOut: false,
@@ -166,6 +176,19 @@ export function reducer(s: GameState, a: Action): GameState {
       return { ...s, results, phase: 'ANALYSIS', saving: false, editorReady: false };
     }
 
+    case 'SAVE_FAILED': {
+      if (s.phase !== 'EDIT' || !s.saving) return s;
+      // The clock ran out while the save was in flight and the save then failed: nothing to show, end the run.
+      if (s.timedOut) return finish(s, autoSync(s, s.index));
+      return { ...s, saving: false };
+    }
+
+    case 'SKIP': {
+      if (s.phase !== 'EDIT' || s.saving || s.results[currentExhibit(s)]) return s;
+      const results = scoreOnce(s, currentExhibit(s), null);
+      return { ...s, results, phase: 'ANALYSIS', editorReady: false };
+    }
+
     case 'NEXT': {
       if (s.phase !== 'ANALYSIS') return s;
       // Timed out during a save: that save counted, everything after it syncs unedited.
@@ -175,6 +198,6 @@ export function reducer(s: GameState, a: Action): GameState {
     }
 
     case 'RESTART':
-      return initialState(s.shipped);
+      return initialState(s.shipped, s.clockTotalMs);
   }
 }
