@@ -44,11 +44,15 @@ export type Measurement = {
 };
 
 /** Compare a saved image against the exact frame instance the player was given. */
-export async function measure(frame: Frame, saved: string): Promise<Measurement> {
+export async function measure(
+  frame: Frame,
+  saved: string,
+  material: number = MATERIAL,
+): Promise<Measurement> {
   const { W, H } = frame;
   const [orig, next] = await Promise.all([toPixels(frame.dataUrl, W, H), toPixels(saved, W, H)]);
   const delta = deltaMap(orig.px, next.px);
-  const mask = diffMask(delta, MATERIAL);
+  const mask = diffMask(delta, material);
 
   let maxDelta = 0;
   for (let i = 0; i < delta.length; i++) if (delta[i] > maxDelta) maxDelta = delta[i];
@@ -115,7 +119,7 @@ export async function measure(frame: Frame, saved: string): Promise<Measurement>
     overThreshold,
     regions,
     collateral,
-    material: MATERIAL,
+    material,
     sweep,
     sweepParts,
     sweepCollateral,

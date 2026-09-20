@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ImageEditorRef } from '@unlayer/react-image-editor';
 import { GENS } from '../frames/evidence';
-import { UNTOUCHED_FLOOR } from '../scoring/calibration';
+import { UNTOUCHED_FLOOR, materialFor } from '../scoring/calibration';
 import { measure } from '../scoring/measure';
 import type { Measurement } from '../scoring/measure';
 import { syntheticSave } from '../scoring/selftest';
@@ -35,7 +35,10 @@ export default function Tracer() {
   };
 
   const runSynthetic = async (kind: SyntheticKind) => {
-    push(`synthetic: ${kind}`, await measure(frame, await syntheticSave(frame, kind)));
+    push(
+      `synthetic: ${kind}`,
+      await measure(frame, await syntheticSave(frame, kind), materialFor(FRAME_INDEX)),
+    );
   };
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export default function Tracer() {
           onError={(e) => setError(e.message)}
           onSave={async ({ dataUrl }) => {
             console.info('[tracer] onSave prefix:', dataUrl.slice(0, 30));
-            push('editor onSave', await measure(frame, dataUrl));
+            push('editor onSave', await measure(frame, dataUrl, materialFor(FRAME_INDEX)));
           }}
         />
       </div>
@@ -93,7 +96,8 @@ export default function Tracer() {
             className="col-span-2 border border-[#334244] p-2 text-left hover:border-sys"
             onClick={async () => {
               const img = editorRef.current?.editor?.getImage();
-              if (img) push('editor getImage()', await measure(frame, img));
+              if (img)
+                push('editor getImage()', await measure(frame, img, materialFor(FRAME_INDEX)));
             }}
           >
             editor.getImage() — untouched canvas
