@@ -7,7 +7,7 @@ import { coverage } from './score';
 export const PROBE_THRESHOLDS = [0, 2, 4, 8, 12, 16, 24, 32, 48];
 
 /** Candidate MATERIAL values whose per-region cover is recorded, to choose a threshold from data. */
-export const SWEEP_THRESHOLDS = [24, 32, 40, 48, 64, 80];
+export const SWEEP_THRESHOLDS = [12, 16, 20, 24, 32, 40, 48, 64, 80];
 
 export type RegionReport = {
   id: string;
@@ -37,6 +37,10 @@ export type Measurement = {
   material: number;
   /** Per-region cover at each candidate MATERIAL, keyed by threshold then region id. */
   sweep: Record<number, Record<string, number>>;
+  /** Per-rect changed/area at each candidate MATERIAL, so group covers can be rebuilt for any threshold. */
+  sweepParts: Record<number, Record<string, { changed: number; area: number }[]>>;
+  /** Collateral fraction at each candidate MATERIAL. */
+  sweepCollateral: Record<number, number>;
 };
 
 /** Compare a saved image against the exact frame instance the player was given. */
@@ -68,11 +72,25 @@ export async function measure(frame: Frame, saved: string): Promise<Measurement>
   });
 
   const sweep: Record<number, Record<string, number>> = {};
+  const sweepParts: Measurement['sweepParts'] = {};
+  const sweepCollateral: Record<number, number> = {};
+  const targetRects = frame.targets.flatMap((t) => t.rects);
   for (const t of SWEEP_THRESHOLDS) {
     const mt = diffMask(delta, t);
     sweep[t] = {};
-    for (const r of [...frame.targets, ...frame.seals])
+    sweepParts[t] = {};
+    for (const r of [...frame.targets, ...frame.seals]) {
       sweep[t][r.id] = coverage(mt, W, H, r.rects).cover;
+      sweepParts[t][r.id] = r.rects.map((rect) => {
+        const p = coverage(mt, W, H, [rect]);
+        return { changed: p.changed, area: p.area };
+      });
+    }
+    const inTargets = coverage(mt, W, H, targetRects);
+    let total = 0;
+    for (let i = 0; i < mt.length; i++) total += mt[i];
+    const outside = W * H - inTargets.area;
+    sweepCollateral[t] = outside ? (total - inTargets.changed) / outside : 0;
   }
 
   const all = coverage(
@@ -99,5 +117,7 @@ export async function measure(frame: Frame, saved: string): Promise<Measurement>
     collateral,
     material: MATERIAL,
     sweep,
+    sweepParts,
+    sweepCollateral,
   };
 }
