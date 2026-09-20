@@ -64,10 +64,16 @@ export async function measure(frame: Frame, saved: string): Promise<Measurement>
   for (const t of SWEEP_THRESHOLDS) {
     const mt = diffMask(delta, t);
     sweep[t] = {};
-    for (const r of [...frame.targets, ...frame.seals]) sweep[t][r.id] = coverage(mt, W, H, r.rects).cover;
+    for (const r of [...frame.targets, ...frame.seals])
+      sweep[t][r.id] = coverage(mt, W, H, r.rects).cover;
   }
 
-  const all = coverage(mask, W, H, frame.targets.flatMap((t) => t.rects));
+  const all = coverage(
+    mask,
+    W,
+    H,
+    frame.targets.flatMap((t) => t.rects),
+  );
   let totalChanged = 0;
   for (let i = 0; i < mask.length; i++) totalChanged += mask[i];
   const outside = W * H - all.area;

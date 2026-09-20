@@ -9,7 +9,11 @@ export type SyntheticKind = 'untouched' | 'bar-over-target' | 'bar-over-seal' | 
  * Build a stand-in for what the editor would save, bypassing the editor entirely.
  * Lets us prove the scoring maths independently of whatever the editor's export does to the pixels.
  */
-export async function syntheticSave(frame: Frame, kind: SyntheticKind, targetId = frame.targets[0].id): Promise<string> {
+export async function syntheticSave(
+  frame: Frame,
+  kind: SyntheticKind,
+  targetId = frame.targets[0].id,
+): Promise<string> {
   const { W, H } = frame;
   const [c, x] = mk(W, H);
   x.drawImage(await loadImage(frame.dataUrl), 0, 0, W, H);

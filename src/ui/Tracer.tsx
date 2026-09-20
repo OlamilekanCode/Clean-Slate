@@ -10,7 +10,11 @@ import { Editor } from './Editor';
 type Entry = { label: string; m: Measurement };
 
 /** `?frame=1..5` picks the exhibit, so the export noise floor can be measured on every frame type. */
-const FRAME_INDEX = Math.min(GENS.length, Math.max(1, Number(new URLSearchParams(location.search).get('frame')) || 1)) - 1;
+const FRAME_INDEX =
+  Math.min(
+    GENS.length,
+    Math.max(1, Number(new URLSearchParams(location.search).get('frame')) || 1),
+  ) - 1;
 
 const pct = (n: number) => (n * 100).toFixed(1) + '%';
 
@@ -55,20 +59,33 @@ export default function Tracer() {
       <aside className="overflow-auto bg-bg p-4">
         <h1 className="mb-1 text-sm tracking-widest text-sys">TRACER BULLET</h1>
         <p className="mb-3 text-[#829092]">
-          editor {loadedMs === null ? 'loading…' : `mounted in ${loadedMs} ms`} · frame {frame.W}×{frame.H}
+          editor {loadedMs === null ? 'loading…' : `mounted in ${loadedMs} ms`} · frame {frame.W}×
+          {frame.H}
         </p>
         {error && <p className="mb-3 text-breach">ERROR: {error}</p>}
         <div className="mb-4 grid grid-cols-2 gap-2">
-          <button className="border border-[#334244] p-2 text-left hover:border-sys" onClick={() => runSynthetic('untouched')}>
+          <button
+            className="border border-[#334244] p-2 text-left hover:border-sys"
+            onClick={() => runSynthetic('untouched')}
+          >
             self-test: untouched
           </button>
-          <button className="border border-[#334244] p-2 text-left hover:border-sys" onClick={() => runSynthetic('bar-over-target')}>
+          <button
+            className="border border-[#334244] p-2 text-left hover:border-sys"
+            onClick={() => runSynthetic('bar-over-target')}
+          >
             self-test: bar over face
           </button>
-          <button className="border border-[#334244] p-2 text-left hover:border-sys" onClick={() => runSynthetic('bar-over-seal')}>
+          <button
+            className="border border-[#334244] p-2 text-left hover:border-sys"
+            onClick={() => runSynthetic('bar-over-seal')}
+          >
             self-test: bar over seal
           </button>
-          <button className="border border-[#334244] p-2 text-left hover:border-sys" onClick={() => runSynthetic('blackout-frame')}>
+          <button
+            className="border border-[#334244] p-2 text-left hover:border-sys"
+            onClick={() => runSynthetic('blackout-frame')}
+          >
             self-test: blackout frame
           </button>
           <button
