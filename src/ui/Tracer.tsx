@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ImageEditorRef } from '@unlayer/react-image-editor';
-import { cctvFrame } from '../frames/evidence';
+import { GENS } from '../frames/evidence';
 import { measure } from '../scoring/measure';
 import type { Measurement } from '../scoring/measure';
 import { syntheticSave } from '../scoring/selftest';
@@ -9,12 +9,15 @@ import { Editor } from './Editor';
 
 type Entry = { label: string; m: Measurement };
 
+/** `?frame=1..5` picks the exhibit, so the export noise floor can be measured on every frame type. */
+const FRAME_INDEX = Math.min(GENS.length, Math.max(1, Number(new URLSearchParams(location.search).get('frame')) || 1)) - 1;
+
 const pct = (n: number) => (n * 100).toFixed(1) + '%';
 
 /** Throwaway harness for the tracer bullet: mount editor, save, log format, measure baseline, prove scoring. */
 export default function Tracer() {
   // Generated exactly once: every score is measured against the instance the player was actually given.
-  const [frame] = useState(() => cctvFrame());
+  const [frame] = useState(() => GENS[FRAME_INDEX]());
   const editorRef = useRef<ImageEditorRef>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loadedMs, setLoadedMs] = useState<number | null>(null);
