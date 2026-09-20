@@ -15,6 +15,8 @@ export type RegionReport = {
   cover: number;
   changed: number;
   area: number;
+  /** Changed/area for each rect on its own, so multi-fragment targets can be checked fragment by fragment. */
+  parts: { changed: number; area: number }[];
 };
 
 export type Measurement = {
@@ -58,7 +60,11 @@ export async function measure(frame: Frame, saved: string): Promise<Measurement>
     ...frame.seals.map((r) => ({ kind: 'seal' as const, r })),
   ].map(({ kind, r }) => {
     const c = coverage(mask, W, H, r.rects);
-    return { id: r.id, kind, cover: c.cover, changed: c.changed, area: c.area };
+    const parts = r.rects.map((rect) => {
+      const p = coverage(mask, W, H, [rect]);
+      return { changed: p.changed, area: p.area };
+    });
+    return { id: r.id, kind, cover: c.cover, changed: c.changed, area: c.area, parts };
   });
 
   const sweep: Record<number, Record<string, number>> = {};
