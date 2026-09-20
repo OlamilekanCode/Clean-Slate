@@ -1,7 +1,14 @@
 import { mk } from '../frames/sensor';
 
-/** Per-channel delta above which a pixel counts as changed. Must sit above the measured export noise floor. */
-export const MATERIAL = 24;
+/**
+ * Per-channel delta above which a pixel counts as changed. Must sit above the export noise floor.
+ *
+ * The editor's onSave returns JPEG, so an untouched save is not pixel-identical to the input. Measured on
+ * all five exhibits (see the calibration notes): at 24 the untouched news broadcast scores its channel-bug seal at
+ * 0.063 — over the 0.05 breach line — so a player who changed nothing would be charged suspicion. At 48 the
+ * worst untouched region anywhere is 0.002, while a black rectangle over a face still scores 0.859.
+ */
+export const MATERIAL = 48;
 
 export type Pixels = { data: Uint8ClampedArray; W: number; H: number };
 
