@@ -39,8 +39,25 @@ function whenImageMounted(cb: () => void): () => void {
   };
 }
 
+/** 'camera-id' -> 'camera id' */
+const nice = (id: string) => id.replace(/-/g, ' ');
+
+/** True at laptop width and above, where the side panel sits next to the editor instead of above it. */
+function useWide(): boolean {
+  const query = '(min-width: 1024px)';
+  const [wide, setWide] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setWide(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return wide;
+}
+
 export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props) {
   const spec = EXHIBITS[exhibit];
+  const wide = useWide();
   const savingRef = useRef(false);
   const cancelReady = useRef<() => void>(() => {});
 
@@ -95,13 +112,13 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
   // A known failure from boot (embed.js blocked or offline) is shown at once rather than after a long wait.
   useEffect(() => {
     if (getEditorLoadError() && !window.ImageEditor) {
-      setProblem('The editor could not be reached. Check your connection.');
+      setProblem('The photo editor could not be reached. Check your connection.');
     }
   }, [attempt]);
   useEffect(() => {
     if (ready || problem) return;
     const id = window.setTimeout(
-      () => setProblem('The editor is taking too long to open.'),
+      () => setProblem('The photo editor is taking too long to open.'),
       20_000,
     );
     return () => window.clearTimeout(id);
@@ -115,22 +132,26 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
   };
 
   return (
-    <div className="relative grid h-full min-h-0 grid-cols-[minmax(0,1fr)_350px] gap-3 p-3">
-      <div className="bezel relative min-h-0 overflow-hidden">
+    <div className="relative flex h-full min-h-0 flex-col gap-2 overflow-y-auto p-2 sm:p-3 lg:grid lg:grid-cols-[minmax(0,1fr)_350px] lg:gap-3 lg:overflow-hidden">
+      <div className="bezel relative order-2 min-h-0 shrink-0 overflow-hidden lg:order-none lg:shrink">
         <Editor
           key={attempt}
           image={frame.dataUrl}
-          minHeight="calc(100vh - 64px - 24px)"
+          minHeight={
+            wide
+              ? 'calc(100dvh - var(--hud-h, 64px) - 24px)'
+              : 'max(520px, calc(100dvh - var(--hud-h, 104px) - 170px))'
+          }
           onLoad={onLoad}
           onSave={onSave}
           onCancel={() => dispatch({ type: 'SKIP' })}
           onLoadError={() => {
             console.error('[game] the image failed to load into the editor');
-            fail('The evidence image could not be loaded into the editor.');
+            fail('The photo could not be loaded into the editor.');
           }}
           onError={(e) => {
             console.error('[game] editor error', e);
-            fail('The editor could not be reached. Check your connection.');
+            fail('The photo editor could not be reached. Check your connection.');
           }}
         />
 
@@ -148,7 +169,7 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
                   <div className="text-xl font-bold text-white">Couldn&apos;t open this file</div>
                   <p className="mt-2 text-[15px] leading-relaxed text-white/80">{problem}</p>
                   <p className="mt-1 text-[14px] text-white/60">
-                    Your clock is still held. Try again, or leave this exhibit as it is.
+                    Your clock is frozen. Try again, or leave this one alone.
                   </p>
                   <div className="mt-5 flex justify-center gap-3">
                     <button
@@ -163,7 +184,7 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
                       className="btn-ghost text-[15px]"
                       onClick={() => dispatch({ type: 'SKIP' })}
                     >
-                      Skip this exhibit
+                      Skip this file
                     </button>
                   </div>
                 </div>
@@ -178,7 +199,7 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
                     />
                   </div>
                   <div className="text-[14px] text-white/70">
-                    Your clock is held until the file is open
+                    Your clock stays frozen until the file opens
                   </div>
                 </>
               )}
@@ -192,8 +213,8 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="text-2xl font-bold text-white">Writing to server</div>
-              <div className="text-[14px] text-white/70">Comparing against the original…</div>
+              <div className="text-2xl font-bold text-white">Uploading…</div>
+              <div className="text-[14px] text-white/70">Checking what you changed…</div>
               <div className="h-1 w-64 overflow-hidden rounded-full bg-white/12">
                 <motion.div
                   className="h-full w-1/3 rounded-full bg-pink"
@@ -207,56 +228,61 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
       </div>
 
       {/* handler comms */}
-      <aside className="card flex min-h-0 flex-col gap-4 overflow-y-auto p-4">
-        <div>
+      <aside className="card order-1 flex shrink-0 flex-col gap-3 p-3 lg:order-none lg:min-h-0 lg:gap-4 lg:self-start lg:overflow-y-auto lg:p-4">
+        <div className="flex items-baseline justify-between gap-3 lg:block">
           <div className="text-[12.5px] tracking-[0.14em] text-neon">
             EXHIBIT {String(spec.number).padStart(2, '0')}
           </div>
-          <div className="font-display text-2xl leading-tight neon-pink">{spec.title}</div>
+          <div className="font-display text-lg leading-tight neon-pink lg:text-2xl">
+            {spec.title}
+          </div>
         </div>
 
-        <div className="border-l-2 border-gold pl-3 text-[14.5px] leading-relaxed text-white/85">
+        <div className="hidden border-l-2 border-gold pl-3 text-[14.5px] leading-relaxed text-white/85 lg:block">
           <div className="mb-1 text-[12.5px] tracking-[0.14em] text-gold">HANDLER</div>
           <Typed text={HANDLER[exhibit].extra ?? HANDLER[exhibit].line} speed={12} delay={400} />
         </div>
 
-        <div>
-          <div className="mb-1 text-[12.5px] tracking-[0.14em] text-[#ffb347]">CONCEAL</div>
-          <div className="flex flex-wrap gap-1.5">
-            {spec.targets.map((t) => (
-              <span
-                key={t.id}
-                className="rounded-md border border-[#ffb347]/60 bg-[#ffb347]/10 px-2.5 py-1 text-[13.5px] text-[#ffb347]"
-              >
-                {t.id}
-              </span>
-            ))}
+        <div className="flex flex-wrap gap-x-6 gap-y-2 lg:block lg:space-y-4">
+          <div>
+            <div className="mb-1 text-[12.5px] tracking-[0.14em] text-[#ffb347]">HIDE IT</div>
+            <div className="flex flex-wrap gap-1.5">
+              {spec.targets.map((t) => (
+                <span
+                  key={t.id}
+                  className="rounded-md border border-[#ffb347]/60 bg-[#ffb347]/10 px-2.5 py-1 text-[13.5px] text-[#ffb347]"
+                >
+                  {nice(t.id)}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <div className="mb-1 text-[12.5px] tracking-[0.14em] text-neon">DO NOT TOUCH</div>
-          <div className="flex flex-wrap gap-1.5">
-            {spec.seals.map((s) => (
-              <span
-                key={s}
-                className="rounded-md border border-neon/60 bg-neon/10 px-2.5 py-1 text-[13.5px] text-neon"
-              >
-                {s}
-              </span>
-            ))}
+          <div>
+            <div className="mb-1 text-[12.5px] tracking-[0.14em] text-neon">HANDS OFF</div>
+            <div className="flex flex-wrap gap-1.5">
+              {spec.seals.map((s) => (
+                <span
+                  key={s}
+                  className="rounded-md border border-neon/60 bg-neon/10 px-2.5 py-1 text-[13.5px] text-neon"
+                >
+                  {nice(s)}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="rounded-xl border border-pink/50 bg-pink/10 p-3 text-[14px] leading-snug text-pink">
           <span className="mr-1 text-[12.5px] tracking-[0.12em]">RULE</span>
-          Cover it opaquely. See-through edits will not hold.
+          Cover it solid. See-through edits will not fool anyone.
+          <span className="sm:hidden"> Tap ✓ to save, ✕ to walk away.</span>
         </div>
 
-        <div className="mt-auto text-[13px] leading-relaxed text-white/65">
-          Press <span className="text-white/80">COMMIT TO FILE</span> when you are done. It counts
-          as your only save for this exhibit. <span className="text-white/84">Cancel</span> leaves
-          the file as it is.
+        <div className="mt-auto hidden text-[13px] leading-relaxed text-white/65 lg:block">
+          Hit <span className="text-white/80">SAVE FILE</span> when you are done. You only get one
+          save per file. <span className="text-white/84">Walk away</span> leaves it exactly as it
+          is.
         </div>
       </aside>
     </div>

@@ -84,9 +84,9 @@ function AnalysisBody({
       out.push({
         key: 'unedited',
         kind: 'FILE',
-        title: 'NO EDIT COMMITTED',
-        verdict: 'SYNCED AS IT WAS',
-        detail: 'Every target on this exhibit keeps its full heat.',
+        title: 'NOTHING SAVED',
+        verdict: 'LEFT AS IT WAS',
+        detail: 'Every target on this file keeps its full heat.',
         tone: 'bad',
       });
     }
@@ -109,14 +109,14 @@ function AnalysisBody({
       else heatNote = 'no heat removed';
       out.push({
         key: `t-${t.id}`,
-        kind: 'TARGET',
-        title: t.id,
-        verdict: t.credit >= 0.999 ? 'CONCEALED' : v.label,
+        kind: 'HIDE IT',
+        title: t.id.replace(/-/g, ' '),
+        verdict: t.credit >= 0.999 ? 'HIDDEN' : v.label,
         detail: [groupNote || v.detail, heatNote].join(' · '),
         tone: t.credit >= 0.999 ? 'good' : t.credit > 0 ? 'warn' : 'bad',
         outline: {
           rects: rectsOf(t.id, frame.targets),
-          label: `${t.id.toUpperCase()} · ${cover >= 0.75 ? Math.round(cover * 100) : Math.floor(cover * 100)}%`,
+          label: `${t.id.replace(/-/g, ' ').toUpperCase()} · ${cover >= 0.75 ? Math.round(cover * 100) : Math.floor(cover * 100)}%`,
         },
       });
     }
@@ -128,29 +128,29 @@ function AnalysisBody({
         const breached = result.breached.includes(s);
         out.push({
           key: `s-${s}`,
-          kind: 'SEAL',
-          title: s,
-          verdict: breached ? 'BREACHED' : cover > 0.004 ? 'NICKED · UNDER THE LINE' : 'INTACT',
+          kind: 'HANDS OFF',
+          title: s.replace(/-/g, ' '),
+          verdict: breached ? 'TAMPERED' : cover > 0.004 ? 'SCRATCHED · LET SLIDE' : 'UNTOUCHED',
           detail: breached
             ? `${(cover * 100).toFixed(1)}% changed · over the ${BREACH_COVER * 100}% line · +${BREACH_SUSPICION} suspicion`
             : `${(cover * 100).toFixed(1)}% changed`,
           tone: breached ? 'bad' : cover > 0.004 ? 'warn' : 'good',
           outline: {
             rects: rectsOf(s, frame.seals),
-            label: `${s.toUpperCase()} · ${breached ? 'BREACH' : 'OK'}`,
+            label: `${s.replace(/-/g, ' ').toUpperCase()} · ${breached ? 'TAMPERED' : 'OK'}`,
           },
         });
       }
       const col = result.collateral;
       out.push({
         key: 'collateral',
-        kind: 'FRAME',
+        kind: 'REST OF THE SHOT',
         title: 'collateral',
-        verdict: result.collateralSuspicion > 0 ? 'OVER-EDITED' : 'WITHIN TOLERANCE',
+        verdict: result.collateralSuspicion > 0 ? 'TOO MUCH' : 'CLEAN',
         detail:
           result.collateralSuspicion > 0
-            ? `${(col * 100).toFixed(1)}% of the rest of the frame changed · +${result.collateralSuspicion.toFixed(0)} suspicion`
-            : `${(col * 100).toFixed(1)}% of the rest of the frame changed`,
+            ? `${(col * 100).toFixed(1)}% of the rest of the shot changed · +${result.collateralSuspicion.toFixed(0)} suspicion`
+            : `${(col * 100).toFixed(1)}% of the rest of the shot changed`,
         tone: result.collateralSuspicion > 0 ? 'bad' : 'good',
       });
     }
@@ -161,7 +161,7 @@ function AnalysisBody({
         key: 'link',
         kind: 'LINK',
         title: 'linked evidence',
-        verdict: 'HEAT TRANSFERRED',
+        verdict: 'HEAT MOVED',
         detail: `LINKED EVIDENCE: ${car.transferred.toFixed(0)} points transferred to Exhibit 05. Clear the witness photo to remove them.`,
         tone: 'warn',
       });
@@ -171,7 +171,7 @@ function AnalysisBody({
         key: 'link',
         kind: 'LINK',
         title: 'linked evidence',
-        verdict: car.credit >= 0.999 ? 'CLEARED' : 'STILL STANDING',
+        verdict: car.credit >= 0.999 ? 'CLEARED' : 'STILL THERE',
         detail: `${car.weight.toFixed(0)} points arrived from Exhibit 02${
           car.credit >= 0.999
             ? ' and you removed all of them.'
@@ -221,31 +221,31 @@ function AnalysisBody({
   }, [rows, step]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="relative h-full w-full overflow-x-hidden overflow-y-auto lg:overflow-hidden">
       <ViceBackdrop mode="dim" />
-      <div className="relative z-10 grid h-full min-h-0 grid-cols-1 gap-4 p-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+      <div className="relative z-10 grid min-h-full grid-cols-1 gap-4 p-3 sm:p-4 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <motion.div
-          className="bezel relative h-fit self-center px-3 pb-3 pt-7"
+          className="bezel relative h-fit self-start px-3 pb-3 pt-7 lg:self-center"
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="absolute left-3 top-2 z-10 text-[12.5px] tracking-[0.14em] text-white/70">
-            {measurement ? 'FILE AS COMMITTED' : 'FILE AS IT WAS'}
+            {measurement ? 'FILE AS YOU SAVED IT' : 'FILE AS IT WAS'}
           </div>
           <Outlines
             src={measurement?.saved ?? frame.dataUrl}
             W={frame.W}
             H={frame.H}
             outlines={outlines}
-            className="mx-auto max-h-[calc(100vh-190px)] w-full"
+            className="mx-auto max-h-[50dvh] w-full lg:max-h-[calc(100dvh-190px)]"
           />
         </motion.div>
 
-        <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
+        <div className="flex min-h-0 flex-col gap-3 lg:overflow-y-auto">
           <div>
             <div className="text-[12.5px] tracking-[0.2em] text-neon">
-              EXHIBIT {String(spec.number).padStart(2, '0')} · FORENSIC ANALYSIS
+              EXHIBIT {String(spec.number).padStart(2, '0')} · WHAT THEY WOULD FIND
             </div>
             <motion.h2
               className="font-display text-[clamp(30px,4vw,54px)] leading-none neon-pink"
@@ -259,7 +259,7 @@ function AnalysisBody({
 
           {timedOut && (
             <div className="border border-breach bg-breach/10 p-2 text-[14px] text-breach">
-              CLOCK EXPIRED. Your save landed first. Everything after this syncs as it is.
+              CLOCK EXPIRED. Your save landed first. Everything left goes to the archive as it is.
             </div>
           )}
 
@@ -314,27 +314,22 @@ function AnalysisBody({
                 animate={{ opacity: 1, y: 0 }}
               >
                 <Meter label="HEAT" from={before.heat} to={after.heat} good="down" />
-                <Meter
-                  label="TAMPERING RISK"
-                  from={before.suspicion}
-                  to={after.suspicion}
-                  good="down"
-                />
+                <Meter label="SUSPICION" from={before.suspicion} to={after.suspicion} good="down" />
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="mt-auto flex items-center gap-4 pb-1 pt-2">
+          <div className="sticky bottom-0 z-20 -mx-3 mt-auto flex items-center gap-4 bg-bg/90 px-3 pb-3 pt-3 backdrop-blur sm:-mx-4 sm:px-4 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-1 lg:pt-2 lg:backdrop-blur-none">
             <motion.button
               type="button"
               onClick={onNext}
               disabled={!done}
-              className="btn-primary px-9 py-3.5 text-lg"
+              className="btn-primary flex-1 px-9 py-3.5 text-lg sm:flex-none"
               style={{ boxShadow: '0 0 24px rgba(45,226,230,0.4)' }}
               whileHover={done ? { scale: 1.06 } : {}}
               whileTap={done ? { scale: 0.96 } : {}}
             >
-              {isLast || timedOut ? 'FILE THE VERDICT' : 'NEXT EXHIBIT'}
+              {isLast || timedOut ? 'SEE HOW IT ENDED' : 'NEXT FILE'}
             </motion.button>
             {!done && (
               <button

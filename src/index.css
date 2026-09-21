@@ -24,6 +24,8 @@ html,
 body,
 #root {
   height: 100%;
+  /* dvh keeps the layout inside the visible area when a phone browser shows its address bar */
+  height: 100dvh;
 }
 body {
   margin: 0;

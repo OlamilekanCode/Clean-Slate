@@ -34,6 +34,7 @@ export default function Verdict({
   const copy = VERDICT_COPY[ending.kind];
   const tone = TONE[ending.kind];
   const short = typeof window !== 'undefined' && window.innerHeight < 820;
+  const narrow = typeof window !== 'undefined' && window.innerWidth < 480;
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -44,7 +45,9 @@ export default function Verdict({
       />
       <SirenEdges intensity={ending.kind === 'TAMPERING' ? 1 : 0} />
 
-      <div className="relative z-10 mx-auto flex h-full max-w-[1200px] flex-col items-center ${short ? 'gap-2.5 py-3' : 'gap-5 py-6'} overflow-y-auto px-6 [&>:first-child]:mt-auto [&>:last-child]:mb-auto">
+      <div
+        className={`relative z-10 mx-auto flex h-full max-w-[1200px] flex-col items-center overflow-y-auto overflow-x-hidden px-4 sm:px-6 [&>:first-child]:mt-auto [&>:last-child]:mb-auto ${short ? 'gap-2.5 py-3' : 'gap-5 py-6'}`}
+      >
         {/* title slam */}
         <motion.div
           className="text-center"
@@ -53,7 +56,7 @@ export default function Verdict({
           transition={{ type: 'spring', stiffness: 130, damping: 14 }}
         >
           <div className="mb-1 text-[13.5px] tracking-[0.22em]" style={{ color: tone.accent }}>
-            {timedOut ? 'CLOCK EXPIRED · ' : ''}CASE 26-4471 · VERDICT
+            {timedOut ? 'CLOCK EXPIRED · ' : ''}CASE 26-4471 · RESULT
           </div>
           <h1
             className={`font-display leading-[0.92] ${tone.cls}`}
@@ -96,12 +99,12 @@ export default function Verdict({
 
         {/* wanted stars */}
         <motion.div
-          className={`card flex flex-col items-center gap-1 px-8 ${short ? 'py-2' : 'py-4'}`}
+          className={`card flex flex-col items-center gap-1 ${narrow ? 'px-4' : 'px-8'} ${short ? 'py-2' : 'py-4'}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
         >
-          <WantedStars level={ending.stars} size={short ? 34 : 54} />
+          <WantedStars level={ending.stars} size={narrow ? 36 : short ? 34 : 54} />
           <div className="text-[13.5px] tracking-[0.2em] text-white/78">
             {ending.stars === 0 ? 'NOT WANTED' : `WANTED LEVEL ${ending.stars}`}
           </div>
@@ -128,11 +131,11 @@ export default function Verdict({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2.4, duration: 0.6 }}
         >
-          <div className="mb-2 grid grid-cols-[1fr_auto_auto_auto] gap-x-6 text-[12.5px] tracking-[0.14em] text-white/65">
-            <span>EXHIBIT</span>
-            <span className="text-right">HEAT REMOVED</span>
-            <span className="text-right">SEALS BREACHED</span>
-            <span className="text-right">STATE</span>
+          <div className="mb-2 grid grid-cols-[1fr_5rem_6.5rem] gap-x-2 sm:grid-cols-[1fr_7rem_7rem_8rem] sm:gap-x-4 text-[12.5px] tracking-[0.14em] text-white/65">
+            <span>FILE</span>
+            <span className="text-right">HEAT CUT</span>
+            <span className="text-right">STAMPS HIT</span>
+            <span className="hidden text-right sm:block">STATUS</span>
           </div>
           {shipped.map((id, i) => {
             const r = results[id];
@@ -140,7 +143,7 @@ export default function Verdict({
             return (
               <motion.div
                 key={id}
-                className={`grid grid-cols-[1fr_auto_auto_auto] items-baseline gap-x-6 border-t border-white/10 ${short ? 'py-0.5' : 'py-1.5'} text-[15px]`}
+                className={`grid grid-cols-[1fr_5rem_6.5rem] items-baseline gap-x-2 sm:grid-cols-[1fr_7rem_7rem_8rem] sm:gap-x-4 border-t border-white/10 ${short ? 'py-0.5' : 'py-1.5'} text-[15px]`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 2.6 + i * 0.15 }}
@@ -159,8 +162,8 @@ export default function Verdict({
                 >
                   {r ? r.breached.length : 0}
                 </span>
-                <span className="text-right text-[13.5px] tracking-[0.1em] text-white/72">
-                  {!r ? 'NOT REACHED' : r.unedited ? 'UNEDITED' : 'EDITED'}
+                <span className="hidden text-right text-[13.5px] tracking-[0.1em] text-white/72 sm:block">
+                  {!r ? 'NOT REACHED' : r.unedited ? 'UNTOUCHED' : 'CHANGED'}
                 </span>
               </motion.div>
             );
@@ -175,7 +178,7 @@ export default function Verdict({
               />
             </div>
             <div>
-              <div className="text-[12px] tracking-[0.14em] text-white/70">TAMPERING RISK</div>
+              <div className="text-[12px] tracking-[0.14em] text-white/70">SUSPICION</div>
               <AnimatedNumber
                 value={suspicion}
                 duration={1.6}

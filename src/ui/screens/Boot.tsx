@@ -53,7 +53,7 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
         />
       )}
 
-      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-7 px-6">
+      <div className="relative z-10 flex h-full flex-col items-center gap-5 overflow-y-auto px-4 py-5 sm:gap-7 sm:px-6 [&>:first-child]:mt-auto [&>:last-child]:mb-auto">
         {/* title */}
         <div className="text-center">
           <motion.div
@@ -62,7 +62,7 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
             animate={{ opacity: 1, letterSpacing: '0.5em' }}
             transition={{ duration: 1.2, delay: 0.1 }}
           >
-            LEONIDA STATE POLICE · EVIDENCE TERMINAL
+            LEONIDA STATE POLICE · EVIDENCE SERVER
           </motion.div>
           <h1
             className="font-display text-[clamp(64px,13vw,168px)] leading-[0.9]"
@@ -90,7 +90,7 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
 
         {/* terminal */}
         <motion.div
-          className="card w-[min(92vw,860px)] p-6"
+          className="card w-[min(92vw,860px)] p-4 sm:p-6"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 1.1 }}
@@ -98,7 +98,7 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
         >
           <div className="mb-3 flex items-center gap-2 text-[12.5px] tracking-[0.14em] text-white/65">
             <span className="blip inline-block h-2 w-2 rounded-full bg-breach" />
-            UNREGISTERED DEVICE · LINK ESTABLISHED
+            STOLEN LAPTOP · YOU ARE IN
           </div>
           <div className="min-h-[136px] space-y-1 text-[15px] leading-relaxed text-sys">
             {BOOT_LINES.slice(0, skipped ? BOOT_LINES.length : line + 1).map((l, i) => (
@@ -151,7 +151,7 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
         >
-          {alarm ? 'Alarm tripped' : 'Trigger alarm'}
+          {alarm ? 'Alarm tripped' : 'Trip the alarm'}
         </motion.button>
       </div>
     </div>
