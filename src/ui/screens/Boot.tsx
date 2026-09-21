@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BOOT_HANDLER, BOOT_LINES } from '../copy';
 import ViceBackdrop from '../vice/ViceBackdrop';
 import { SirenEdges, Typed } from '../vice/motion-bits';
@@ -24,7 +24,15 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
   const [line, setLine] = useState(0);
   const [handlerDone, setHandlerDone] = useState(false);
   const [alarm, setAlarm] = useState(false);
-  const linesDone = line >= BOOT_LINES.length;
+  // The intro can be skipped (button or Enter), so nobody has to wait through the typing.
+  const [skipped, setSkipped] = useState(false);
+  const linesDone = skipped || line >= BOOT_LINES.length;
+  const ready = skipped || handlerDone;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Enter' && setSkipped(true);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const trigger = () => {
     if (alarm) return;
@@ -49,7 +57,7 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
         {/* title */}
         <div className="text-center">
           <motion.div
-            className="mb-2 text-[11px] tracking-[0.5em] text-neon"
+            className="mb-2 text-[13.5px] tracking-[0.22em] text-neon"
             initial={{ opacity: 0, letterSpacing: '1.4em' }}
             animate={{ opacity: 1, letterSpacing: '0.5em' }}
             transition={{ duration: 1.2, delay: 0.1 }}
@@ -57,8 +65,7 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
             LEONIDA STATE POLICE · EVIDENCE TERMINAL
           </motion.div>
           <h1
-            className="font-display glitch text-[clamp(64px,13vw,168px)] leading-[0.9]"
-            data-text="CLEAN SLATE"
+            className="font-display text-[clamp(64px,13vw,168px)] leading-[0.9]"
             style={{ perspective: 600 }}
           >
             {WORD_A.map((c, i) => (
@@ -83,21 +90,21 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
 
         {/* terminal */}
         <motion.div
-          className="w-[min(92vw,860px)] border border-neon/40 bg-black/70 p-5 backdrop-blur-sm"
+          className="card w-[min(92vw,860px)] p-6"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 1.1 }}
           style={{ boxShadow: '0 0 40px rgba(45,226,230,0.15), inset 0 0 30px rgba(0,0,0,0.6)' }}
         >
-          <div className="mb-3 flex items-center gap-2 text-[10px] tracking-[0.3em] text-white/45">
+          <div className="mb-3 flex items-center gap-2 text-[12.5px] tracking-[0.14em] text-white/65">
             <span className="blip inline-block h-2 w-2 rounded-full bg-breach" />
             UNREGISTERED DEVICE · LINK ESTABLISHED
           </div>
-          <div className="min-h-[136px] space-y-1 text-[13px] leading-relaxed text-sys glow-cyan">
-            {BOOT_LINES.slice(0, line + 1).map((l, i) => (
+          <div className="min-h-[136px] space-y-1 text-[15px] leading-relaxed text-sys">
+            {BOOT_LINES.slice(0, skipped ? BOOT_LINES.length : line + 1).map((l, i) => (
               <div key={i}>
                 <span className="text-pink">&gt; </span>
-                {i === line ? (
+                {i === line && !skipped ? (
                   <Typed
                     text={l}
                     speed={10}
@@ -111,39 +118,40 @@ export default function Boot({ onTrigger }: { onTrigger: () => void }) {
             ))}
           </div>
           {linesDone && (
-            <div className="mt-4 border-t border-white/15 pt-3 text-[13px] leading-relaxed text-white/90">
+            <div className="mt-4 border-t border-white/15 pt-3 text-[15px] leading-relaxed text-white/90">
               <span className="mr-2 text-gold">HANDLER</span>
-              <Typed text={BOOT_HANDLER} speed={14} onDone={() => setHandlerDone(true)} />
+              {skipped ? (
+                BOOT_HANDLER
+              ) : (
+                <Typed text={BOOT_HANDLER} speed={14} onDone={() => setHandlerDone(true)} />
+              )}
             </div>
           )}
         </motion.div>
+
+        {!ready && (
+          <button
+            type="button"
+            onClick={() => setSkipped(true)}
+            className="btn-ghost -mt-3 px-4 py-1.5 text-[14px]"
+          >
+            Skip intro <span className="ml-2 text-white/60">Enter</span>
+          </button>
+        )}
 
         {/* trigger */}
         <motion.button
           type="button"
           onClick={trigger}
-          disabled={!handlerDone || alarm}
-          className="font-display relative border-2 border-pink bg-black/60 px-10 py-3 text-2xl tracking-[0.25em] text-white disabled:opacity-0"
-          style={{
-            boxShadow: '0 0 26px rgba(255,45,149,0.6), inset 0 0 18px rgba(255,45,149,0.3)',
-          }}
-          animate={
-            handlerDone && !alarm
-              ? {
-                  scale: [1, 1.045, 1],
-                  boxShadow: [
-                    '0 0 18px rgba(255,45,149,0.5)',
-                    '0 0 46px rgba(255,45,149,0.95)',
-                    '0 0 18px rgba(255,45,149,0.5)',
-                  ],
-                }
-              : {}
-          }
-          transition={{ duration: 1.3, repeat: Infinity }}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.96 }}
+          disabled={!ready || alarm}
+          className="btn-primary px-12 py-4 text-xl"
+          initial={false}
+          animate={{ opacity: ready ? 1 : 0, y: ready ? 0 : 12 }}
+          style={{ pointerEvents: ready ? 'auto' : 'none' }}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
         >
-          {alarm ? 'ALARM TRIPPED' : 'TRIGGER ALARM'}
+          {alarm ? 'Alarm tripped' : 'Trigger alarm'}
         </motion.button>
       </div>
     </div>

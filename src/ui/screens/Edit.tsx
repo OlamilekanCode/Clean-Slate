@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useRef, type Dispatch } from 'react';
+import { useCallback, useEffect, useRef, useState, type Dispatch } from 'react';
 import type { Frame } from '../../frames/sensor';
 import { EXHIBITS, coverageFromMeasurement, type ExhibitId } from '../../game/case';
 import type { Action, GameState } from '../../game/reducer';
 import { materialFor, sealMaterialFor } from '../../scoring/calibration';
 import { measure, type Measurement } from '../../scoring/measure';
 import { Editor } from '../Editor';
+import { getEditorLoadError, loadPinnedEditor } from '../preloadEditor';
 import { HANDLER } from '../copy';
 import { Typed } from '../vice/motion-bits';
 
@@ -82,17 +83,55 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
 
   const ready = state.editorReady;
 
+  // Reliable loading: if the editor cannot open (blocked or slow CDN, a script error), say so and offer a way out
+  // instead of leaving the player on a spinner. The clock stays held the whole time, so nothing is lost.
+  const [attempt, setAttempt] = useState(0);
+  const [problem, setProblem] = useState<string | null>(null);
+  const readyRef = useRef(ready);
+  readyRef.current = ready;
+  const fail = useCallback((message: string) => {
+    if (!readyRef.current) setProblem(message);
+  }, []);
+  // A known failure from boot (embed.js blocked or offline) is shown at once rather than after a long wait.
+  useEffect(() => {
+    if (getEditorLoadError() && !window.ImageEditor) {
+      setProblem('The editor could not be reached. Check your connection.');
+    }
+  }, [attempt]);
+  useEffect(() => {
+    if (ready || problem) return;
+    const id = window.setTimeout(
+      () => setProblem('The editor is taking too long to open.'),
+      20_000,
+    );
+    return () => window.clearTimeout(id);
+  }, [ready, problem, attempt]);
+  const retry = () => {
+    setProblem(null);
+    // Re-fetch through the pinned loader so a recovery cannot quietly change the editor version.
+    loadPinnedEditor()
+      .catch(() => {})
+      .finally(() => setAttempt((n) => n + 1));
+  };
+
   return (
-    <div className="relative grid h-full min-h-0 grid-cols-[minmax(0,1fr)_300px] gap-3 p-3">
+    <div className="relative grid h-full min-h-0 grid-cols-[minmax(0,1fr)_350px] gap-3 p-3">
       <div className="bezel relative min-h-0 overflow-hidden">
         <Editor
+          key={attempt}
           image={frame.dataUrl}
-          minHeight="calc(100vh - 58px - 26px - 24px)"
+          minHeight="calc(100vh - 64px - 24px)"
           onLoad={onLoad}
           onSave={onSave}
           onCancel={() => dispatch({ type: 'SKIP' })}
-          onLoadError={() => console.error('[game] the image failed to load into the editor')}
-          onError={(e) => console.error('[game] editor error', e)}
+          onLoadError={() => {
+            console.error('[game] the image failed to load into the editor');
+            fail('The evidence image could not be loaded into the editor.');
+          }}
+          onError={(e) => {
+            console.error('[game] editor error', e);
+            fail('The editor could not be reached. Check your connection.');
+          }}
         />
 
         {/* until the editor has really mounted, the clock is not running and we say so */}
@@ -100,66 +139,94 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
           {!ready && (
             <motion.div
               key="loading"
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/80"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#06070b]/90 p-6 text-center"
               initial={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.5 } }}
+              exit={{ opacity: 0, transition: { duration: 0.4 } }}
             >
-              <div className="font-display text-3xl neon-cyan">OPENING FILE</div>
-              <div className="h-[3px] w-56 overflow-hidden bg-white/10">
-                <motion.div
-                  className="h-full w-1/3 bg-neon"
-                  animate={{ x: ['-100%', '300%'] }}
-                  transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
-                />
-              </div>
-              <div className="text-[11px] tracking-[0.25em] text-white/50">
-                CLOCK HELD UNTIL THE FILE IS OPEN
-              </div>
+              {problem ? (
+                <div className="card max-w-md p-6">
+                  <div className="text-xl font-bold text-white">Couldn&apos;t open this file</div>
+                  <p className="mt-2 text-[15px] leading-relaxed text-white/80">{problem}</p>
+                  <p className="mt-1 text-[14px] text-white/60">
+                    Your clock is still held. Try again, or leave this exhibit as it is.
+                  </p>
+                  <div className="mt-5 flex justify-center gap-3">
+                    <button
+                      type="button"
+                      className="btn-primary px-6 py-2.5 text-base"
+                      onClick={retry}
+                    >
+                      Try again
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost text-[15px]"
+                      onClick={() => dispatch({ type: 'SKIP' })}
+                    >
+                      Skip this exhibit
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold text-white">Opening file</div>
+                  <div className="h-1 w-56 overflow-hidden rounded-full bg-white/12">
+                    <motion.div
+                      className="h-full w-1/3 rounded-full bg-neon"
+                      animate={{ x: ['-100%', '300%'] }}
+                      transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
+                    />
+                  </div>
+                  <div className="text-[14px] text-white/70">
+                    Your clock is held until the file is open
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
           {state.saving && (
             <motion.div
               key="saving"
-              className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/75"
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-[#06070b]/85"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="font-display text-4xl neon-pink">WRITING TO SERVER</div>
-              <div className="text-[11px] tracking-[0.3em] text-white/60">
-                COMPARING AGAINST ORIGINAL…
+              <div className="text-2xl font-bold text-white">Writing to server</div>
+              <div className="text-[14px] text-white/70">Comparing against the original…</div>
+              <div className="h-1 w-64 overflow-hidden rounded-full bg-white/12">
+                <motion.div
+                  className="h-full w-1/3 rounded-full bg-pink"
+                  animate={{ x: ['-100%', '300%'] }}
+                  transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+                />
               </div>
-              <motion.div
-                className="h-[2px] w-72 bg-pink"
-                animate={{ scaleX: [0.1, 1, 0.1], opacity: [0.4, 1, 0.4] }}
-                transition={{ duration: 0.9, repeat: Infinity }}
-              />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       {/* handler comms */}
-      <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto border border-white/10 bg-black/60 p-3 backdrop-blur-sm">
+      <aside className="card flex min-h-0 flex-col gap-4 overflow-y-auto p-4">
         <div>
-          <div className="text-[10px] tracking-[0.3em] text-neon">
+          <div className="text-[12.5px] tracking-[0.14em] text-neon">
             EXHIBIT {String(spec.number).padStart(2, '0')}
           </div>
           <div className="font-display text-2xl leading-tight neon-pink">{spec.title}</div>
         </div>
 
-        <div className="border-l-2 border-gold pl-3 text-[12.5px] leading-relaxed text-white/85">
-          <div className="mb-1 text-[10px] tracking-[0.3em] text-gold">HANDLER</div>
+        <div className="border-l-2 border-gold pl-3 text-[14.5px] leading-relaxed text-white/85">
+          <div className="mb-1 text-[12.5px] tracking-[0.14em] text-gold">HANDLER</div>
           <Typed text={HANDLER[exhibit].extra ?? HANDLER[exhibit].line} speed={12} delay={400} />
         </div>
 
         <div>
-          <div className="mb-1 text-[10px] tracking-[0.3em] text-[#ffb347]">CONCEAL</div>
+          <div className="mb-1 text-[12.5px] tracking-[0.14em] text-[#ffb347]">CONCEAL</div>
           <div className="flex flex-wrap gap-1.5">
             {spec.targets.map((t) => (
               <span
                 key={t.id}
-                className="border border-[#ffb347]/70 bg-[#ffb347]/10 px-2 py-0.5 text-[11px] text-[#ffb347]"
+                className="rounded-md border border-[#ffb347]/60 bg-[#ffb347]/10 px-2.5 py-1 text-[13.5px] text-[#ffb347]"
               >
                 {t.id}
               </span>
@@ -168,12 +235,12 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
         </div>
 
         <div>
-          <div className="mb-1 text-[10px] tracking-[0.3em] text-neon">DO NOT TOUCH</div>
+          <div className="mb-1 text-[12.5px] tracking-[0.14em] text-neon">DO NOT TOUCH</div>
           <div className="flex flex-wrap gap-1.5">
             {spec.seals.map((s) => (
               <span
                 key={s}
-                className="border border-neon/70 bg-neon/10 px-2 py-0.5 text-[11px] text-neon"
+                className="rounded-md border border-neon/60 bg-neon/10 px-2.5 py-1 text-[13.5px] text-neon"
               >
                 {s}
               </span>
@@ -181,14 +248,14 @@ export default function Edit({ exhibit, frame, state, dispatch, onSaved }: Props
           </div>
         </div>
 
-        <div className="border border-pink/60 bg-pink/10 p-2 text-[12px] leading-snug text-pink">
-          <span className="mr-1 text-[10px] tracking-[0.25em]">RULE</span>
+        <div className="rounded-xl border border-pink/50 bg-pink/10 p-3 text-[14px] leading-snug text-pink">
+          <span className="mr-1 text-[12.5px] tracking-[0.12em]">RULE</span>
           Cover it opaquely. See-through edits will not hold.
         </div>
 
-        <div className="mt-auto text-[10.5px] leading-relaxed text-white/45">
+        <div className="mt-auto text-[13px] leading-relaxed text-white/65">
           Press <span className="text-white/80">COMMIT TO FILE</span> when you are done. It counts
-          as your only save for this exhibit. <span className="text-white/70">Cancel</span> leaves
+          as your only save for this exhibit. <span className="text-white/84">Cancel</span> leaves
           the file as it is.
         </div>
       </aside>
