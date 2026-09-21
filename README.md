@@ -53,19 +53,37 @@ so there are no image assets, and it uses system fonts only, so nothing can fail
 
 ## Every ending, played for real
 
-Four real playthroughs of the game, recorded from the production build. Nothing is mocked: each one is the
-actual editor being driven, the actual save being scored, and the actual verdict.
+Four real playthroughs of the game, recorded at normal speed from the production build. Nothing is mocked: each
+one is the actual editor being driven, the actual save being scored, and the actual verdict. They are animated
+WebP, so if one looks frozen, give it a second to load.
 
-<table>
-  <tr>
-    <td width="50%"><img src="docs/gifs/clean-slate.gif" alt="A successful clear: CLEAN SLATE"><br><b>A successful clear.</b> Cover every target solid, leave every proof stamp alone, and the file is clean: heat near zero, no stars, <b>CLEAN SLATE</b>.</td>
-    <td width="50%"><img src="docs/gifs/tampering.gif" alt="Messing with the proof stamps: tampering charge"><br><b>Messing with the proof stamps.</b> Black out the stamps instead of the evidence and suspicion climbs with each one. Two exhibits in, it maxes and the run ends at once with a <b>tampering charge</b>.</td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/gifs/not-fully-clear.gif" alt="Not fully clear: still wanted"><br><b>Not fully clear.</b> Four exhibits cleared perfectly, but the witness photo is left alone. Hiding the car in the traffic capture moved its heat there instead of removing it, so it is still on the file: <b>STILL WANTED</b>, one star.</td>
-    <td width="50%"><img src="docs/gifs/timeout.gif" alt="Running out the clock: busted"><br><b>Running out the clock.</b> Do nothing and the five-minute clock expires. Every file goes to the archive untouched: <b>BUSTED</b>, six stars.</td>
-  </tr>
-</table>
+### A clean run: CLEAN SLATE
+
+Cover every target solid, leave every proof stamp alone, and the file is clean: heat near zero, no stars.
+The traffic-camera shot shows the linked evidence, and the witness photo at the end takes the car off you for good.
+
+<img src="docs/gifs/clean-slate.webp" alt="A full run that ends in CLEAN SLATE" width="100%">
+
+### Messing with the proof stamps: TAMPERING CHARGE
+
+Black out the stamps instead of the evidence and suspicion climbs with each one. Two files in, it maxes and the
+run ends at once with a tampering charge.
+
+<img src="docs/gifs/tampering.webp" alt="Blacking out the proof stamps until suspicion maxes out" width="100%">
+
+### Walking away: STILL WANTED
+
+Clear the first two files, including the car, then walk away from the rest. The car's heat moved to the witness
+photo, so it is still on the file, and the run ends at four stars.
+
+<img src="docs/gifs/still-wanted.webp" alt="Clearing two files and walking away: still wanted at four stars" width="100%">
+
+### Running out the clock: BUSTED
+
+Do nothing and the clock expires. Every file goes to the archive untouched: six stars. (This one runs on a
+shortened clock, `/?clock=22`, so it does not take five minutes.)
+
+<img src="docs/gifs/busted.webp" alt="Letting the clock run out: busted at six stars" width="100%">
 
 ## The idea
 
