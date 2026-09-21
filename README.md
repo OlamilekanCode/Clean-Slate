@@ -9,9 +9,11 @@ identify them: a CCTV still, a traffic-camera capture, a police report, a news b
 photo. The [React Image Editor](https://github.com/unlayer/react-image-editor) is the game: every move the
 player makes is an edit in the editor, and the score comes from measuring exactly which pixels they changed.
 
+**Play it live: [clean-slate-beta.vercel.app](https://clean-slate-beta.vercel.app/)**
+
 > **Status: playable.** The full loop works end to end in a real browser: boot, briefing, editing with the
 > clock, forensic analysis and verdict, across all five exhibits (CCTV, traffic camera, police report, news
-> broadcast, witness photo), with all four endings. Still to do: a public deployment.
+> broadcast, witness photo), with all four endings. It is deployed on Vercel.
 
 <table>
   <tr>
@@ -37,6 +39,22 @@ everything you have to read, with the striped sun, palms, skyline and scrolling 
 when the clock or the risk gets dangerous, and a wanted-stars HUD that tracks heat. Instructions and evidence
 are kept free of scanlines and glow so they stay easy to read. All of it is vector art and CSS drawn in code,
 so there are no image assets, and it uses system fonts only, so nothing can fail to load.
+
+## Every ending, played for real
+
+Four real playthroughs of the game, recorded from the production build. Nothing is mocked: each one is the
+actual editor being driven, the actual save being scored, and the actual verdict.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/gifs/clean-slate.gif" alt="A successful clear: CLEAN SLATE"><br><b>A successful clear.</b> Cover every target opaquely, leave every seal alone, and the file is clean: heat near zero, no stars, <b>CLEAN SLATE</b>.</td>
+    <td width="50%"><img src="docs/gifs/tampering.gif" alt="Tripping the tamper seals: tampering charge"><br><b>Tripping the tamper seals.</b> Redact the integrity seals instead of the evidence and suspicion climbs with each breach. Two exhibits in, it maxes and the run ends at once with a <b>tampering charge</b>.</td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/gifs/not-fully-clear.gif" alt="Not fully clear: partial"><br><b>Not fully clear.</b> Four exhibits cleared perfectly, but the witness photo is left alone. Hiding the car in the traffic capture moved its heat there instead of removing it, so it is still on the file: <b>PARTIAL</b>, one star.</td>
+    <td width="50%"><img src="docs/gifs/timeout.gif" alt="Running out the clock: synced"><br><b>Running out the clock.</b> Do nothing and the five-minute clock expires. Everything syncs to the archive untouched: <b>SYNCED</b>, six stars.</td>
+  </tr>
+</table>
 
 ## The idea
 
@@ -193,7 +211,7 @@ Built with Vite, React 18, TypeScript and Tailwind v4, with `@unlayer/react-imag
 - [x] Game screens: boot, brief, edit with the clock, analysis, verdict
 - [x] Police report and news broadcast calibrated and added to the run
 - [x] A modern, readable look, and reliable editor loading with a way out
-- [ ] Deployed build and a short capture
+- [x] Deployed on Vercel, with recorded playthroughs of every ending
 
 ## Disclaimer
 
