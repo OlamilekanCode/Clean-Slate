@@ -33,11 +33,11 @@ export const EDITOR_OPTIONS = {
   },
   translations: {
     en: {
-      'image_editor.toolbar.save': 'COMMIT TO FILE',
-      'image_editor.tools.shapes': 'Redact',
-      'image_editor.tools.stickers': 'Overlay',
-      'image_editor.tools.draw': 'Retouch',
-      'image_editor.tools.text': 'Relabel',
+      'image_editor.toolbar.save': 'SAVE FILE',
+      'image_editor.tools.shapes': 'Blackout',
+      'image_editor.tools.stickers': 'Stickers',
+      'image_editor.tools.draw': 'Scribble',
+      'image_editor.tools.text': 'Write',
     },
   },
   // `dock` is honoured by the CDN editor but missing from the @unlayer/types bundled with the wrapper
