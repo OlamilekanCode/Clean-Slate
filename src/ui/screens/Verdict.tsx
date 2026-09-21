@@ -33,6 +33,7 @@ export default function Verdict({
 }: Props) {
   const copy = VERDICT_COPY[ending.kind];
   const tone = TONE[ending.kind];
+  const short = typeof window !== 'undefined' && window.innerHeight < 820;
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -43,7 +44,7 @@ export default function Verdict({
       />
       <SirenEdges intensity={ending.kind === 'TAMPERING' ? 1 : 0} />
 
-      <div className="relative z-10 mx-auto flex h-full max-w-[1200px] flex-col items-center justify-center gap-5 overflow-y-auto px-6 py-6">
+      <div className="relative z-10 mx-auto flex h-full max-w-[1200px] flex-col items-center ${short ? 'gap-2.5 py-3' : 'gap-5 py-6'} overflow-y-auto px-6 [&>:first-child]:mt-auto [&>:last-child]:mb-auto">
         {/* title slam */}
         <motion.div
           className="text-center"
@@ -57,7 +58,7 @@ export default function Verdict({
           <h1
             className={`font-display leading-[0.92] ${tone.cls}`}
             style={{
-              fontSize: `clamp(40px, ${copy.title.length > 12 ? 7.2 : 11}vw, ${copy.title.length > 12 ? 108 : 150}px)`,
+              fontSize: `clamp(40px, min(${copy.title.length > 12 ? 7.2 : 11}vw, ${short ? (copy.title.length > 12 ? 10 : 13) : copy.title.length > 12 ? 12 : 16}vh), ${copy.title.length > 12 ? 108 : 150}px)`,
             }}
           >
             {(() => {
@@ -95,18 +96,18 @@ export default function Verdict({
 
         {/* wanted stars */}
         <motion.div
-          className="card flex flex-col items-center gap-1 px-8 py-4"
+          className={`card flex flex-col items-center gap-1 px-8 ${short ? 'py-2' : 'py-4'}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
         >
-          <WantedStars level={ending.stars} size={54} />
+          <WantedStars level={ending.stars} size={short ? 34 : 54} />
           <div className="text-[13.5px] tracking-[0.2em] text-white/78">
             {ending.stars === 0 ? 'NOT WANTED' : `WANTED LEVEL ${ending.stars}`}
           </div>
         </motion.div>
 
-        <div className="card max-w-[720px] px-7 py-4 text-center">
+        <div className={`card max-w-[720px] px-7 text-center ${short ? 'py-2' : 'py-4'}`}>
           <div className="font-display text-2xl text-white">
             <Typed text={copy.sub} speed={26} delay={1300} cursor={false} />
           </div>
@@ -122,7 +123,7 @@ export default function Verdict({
 
         {/* recap */}
         <motion.div
-          className="card w-full max-w-[860px] p-5"
+          className={`card w-full max-w-[860px] ${short ? 'p-3' : 'p-5'}`}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2.4, duration: 0.6 }}
@@ -139,7 +140,7 @@ export default function Verdict({
             return (
               <motion.div
                 key={id}
-                className="grid grid-cols-[1fr_auto_auto_auto] items-baseline gap-x-6 border-t border-white/10 py-1.5 text-[15px]"
+                className={`grid grid-cols-[1fr_auto_auto_auto] items-baseline gap-x-6 border-t border-white/10 ${short ? 'py-0.5' : 'py-1.5'} text-[15px]`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 2.6 + i * 0.15 }}
@@ -170,7 +171,7 @@ export default function Verdict({
               <AnimatedNumber
                 value={heat}
                 duration={1.6}
-                className="font-display text-5xl neon-pink"
+                className={`font-display neon-pink ${short ? 'text-4xl' : 'text-5xl'}`}
               />
             </div>
             <div>
@@ -178,7 +179,7 @@ export default function Verdict({
               <AnimatedNumber
                 value={suspicion}
                 duration={1.6}
-                className={`font-display text-5xl ${suspicion >= 40 ? 'text-breach' : 'neon-cyan'}`}
+                className={`font-display ${short ? 'text-4xl' : 'text-5xl'} ${suspicion >= 40 ? 'text-breach' : 'neon-cyan'}`}
               />
             </div>
           </div>
@@ -187,7 +188,7 @@ export default function Verdict({
         <motion.button
           type="button"
           onClick={onRestart}
-          className="btn-primary px-12 py-4 text-xl"
+          className={`btn-primary px-12 text-xl ${short ? 'py-2.5' : 'py-4'}`}
           style={{ boxShadow: '0 0 28px rgba(255,45,149,0.55)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
