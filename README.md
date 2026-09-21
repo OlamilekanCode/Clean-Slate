@@ -1,5 +1,7 @@
 # CLEAN SLATE
 
+**▶ Play it now: [clean-slate-beta.vercel.app](https://clean-slate-beta.vercel.app/)**
+
 > You are at six stars. You have no gun. You have access to the LSPD evidence server.
 > Beat the wanted level by editing the evidence against you before it syncs.
 
@@ -9,7 +11,16 @@ identify them: a CCTV still, a traffic-camera capture, a police report, a news b
 photo. The [React Image Editor](https://github.com/unlayer/react-image-editor) is the game: every move the
 player makes is an edit in the editor, and the score comes from measuring exactly which pixels they changed.
 
-**Play it live: [clean-slate-beta.vercel.app](https://clean-slate-beta.vercel.app/)**
+**What makes it different**
+
+- **One connected case, not five separate puzzles.** Hiding the car in the traffic-camera capture does not make
+  it go away: its heat _moves_ to the witness photo, and stays on your file until you clear it there too. An
+  edit in one exhibit creates unfinished work in another. Today the car is the one link between exhibits, and
+  it is the mechanic the whole run is built around.
+- **Every visual is original.** All five exhibits, the sunset backdrop and the interface are generated in code
+  at runtime. There are no screenshots, no stills and no Rockstar material anywhere in the project.
+- **The scoring is measured, not guessed.** It reads the editor's real saved output, and its thresholds were
+  calibrated from 77 real-editor runs (see below), including the parts that did not work at first.
 
 > **Status: playable.** The full loop works end to end in a real browser: boot, briefing, editing with the
 > clock, forensic analysis and verdict, across all five exhibits (CCTV, traffic camera, police report, news
@@ -160,7 +171,7 @@ target's rects are grouped: the fragments of one car body are unioned (so a thin
 whole car), but the witness photo's car plate is its own group, because a legible plate is a separate clue.
 
 The endings resolve in order: **Tampering** (suspicion ≥ 100), **CLEAN SLATE** (heat ≤ 5 and suspicion < 40),
-**Synced** (clock expired with heat above 60, six stars) and **Partial** (1–5 stars from remaining heat).
+**Synced** (heat above 60 and either the clock expired or nothing changed at all, six stars) and **Partial** (1–5 stars from remaining heat).
 A save and a timeout can never score an exhibit twice, and a save already in flight beats the clock.
 
 ## Run it
@@ -168,7 +179,7 @@ A save and a timeout can never score an exhibit twice, and a save already in fli
 ```bash
 npm install
 npm run dev      # the game at http://localhost:5173
-npm test         # 48 tests for the game logic, no browser needed
+npm test         # 53 tests for the game logic, no browser needed
 npm run build    # typecheck and production build
 ```
 
