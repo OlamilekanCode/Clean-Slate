@@ -319,7 +319,7 @@ function AnalysisBody({
             )}
           </AnimatePresence>
 
-          <div className="sticky bottom-0 z-20 -mx-3 mt-auto flex items-center gap-4 bg-bg/90 px-3 pb-3 pt-3 backdrop-blur sm:-mx-4 sm:px-4 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-1 lg:pt-2 lg:backdrop-blur-none">
+          <div className="sticky bottom-0 z-20 -mx-3 mt-auto flex items-center gap-4 bg-bg/90 px-3 pb-3 pt-3 backdrop-blur sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0 lg:pb-2">
             <motion.button
               type="button"
               onClick={onNext}
