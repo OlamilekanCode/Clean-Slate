@@ -6,14 +6,13 @@ import { EXHIBITS, SHIPPED, validateFrames, type ExhibitId } from './game/case';
 import { heatOf, initialState, reducer, suspicionOf, type Results } from './game/reducer';
 import type { Measurement } from './scoring/measure';
 import Chrome from './ui/Chrome';
-import { TICKER } from './ui/copy';
 import Tracer from './ui/Tracer';
 import Analysis from './ui/screens/Analysis';
 import Boot from './ui/screens/Boot';
 import Brief from './ui/screens/Brief';
 import Edit from './ui/screens/Edit';
 import Verdict from './ui/screens/Verdict';
-import { SirenEdges, Ticker, Wipe } from './ui/vice/motion-bits';
+import { SirenEdges, Wipe } from './ui/vice/motion-bits';
 
 type Frames = Partial<Record<ExhibitId, Frame>>;
 
@@ -206,16 +205,8 @@ function Game() {
         </AnimatePresence>
       </main>
 
-      {showChrome && (
-        <Ticker
-          items={TICKER}
-          className="relative z-40 h-[26px] shrink-0 border-t border-white/10 bg-black/80 text-[10px] leading-[26px] tracking-[0.25em] text-white/45"
-        />
-      )}
-
       <SirenEdges intensity={siren} />
       {!firstScene.current && <Wipe sceneKey={sceneKey} />}
-      <div className="crt" aria-hidden />
     </div>
   );
 }

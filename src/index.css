@@ -14,9 +14,10 @@
   --color-sun: #ff9a3c;
   --color-gold: #ffd166;
   --color-siren-blue: #3b6bff;
-  --font-mono: ui-monospace, 'DejaVu Sans Mono', Consolas, 'Liberation Mono', monospace;
-  --font-display:
-    Impact, 'Arial Narrow Bold', 'Franklin Gothic Heavy', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+  --font-display: var(--font-sans);
 }
 
 html,
@@ -28,153 +29,40 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: #e4e7e8;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   overflow: hidden;
 }
 
 /* ---------- type ---------- */
+/* Headings: a heavy, tight system sans instead of a condensed italic. */
 .font-display {
-  font-family: var(--font-display);
-  font-style: italic;
-  letter-spacing: 0.02em;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
 }
 
 .neon-pink {
-  color: #ffd6ec;
-  text-shadow:
-    0 0 4px #ff8ac8,
-    0 0 14px var(--color-pink),
-    0 0 34px var(--color-pink),
-    0 0 70px rgba(255, 45, 149, 0.55);
+  color: #ff5fb0;
+  text-shadow: 0 0 22px rgba(255, 45, 149, 0.35);
 }
 .neon-cyan {
-  color: #d9ffff;
-  text-shadow:
-    0 0 4px #9ff6f8,
-    0 0 14px var(--color-neon),
-    0 0 34px var(--color-neon),
-    0 0 70px rgba(45, 226, 230, 0.5);
+  color: #52ecef;
+  text-shadow: 0 0 22px rgba(45, 226, 230, 0.3);
 }
 .neon-sun {
-  color: #fff1d6;
-  text-shadow:
-    0 0 4px #ffd08a,
-    0 0 16px var(--color-sun),
-    0 0 40px rgba(255, 154, 60, 0.6);
+  color: #ffb05c;
+  text-shadow: 0 0 22px rgba(255, 154, 60, 0.3);
 }
 .glow-cyan {
-  text-shadow: 0 0 10px rgba(124, 232, 210, 0.55);
+  text-shadow: none;
 }
 .glow-pink {
-  text-shadow: 0 0 10px rgba(255, 45, 149, 0.6);
-}
-
-/* Chromatic-aberration glitch: two offset copies flicker in and out around the real text. */
-.glitch {
-  position: relative;
-  display: inline-block;
-}
-.glitch::before,
-.glitch::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.85;
-  mix-blend-mode: screen;
-}
-.glitch::before {
-  color: var(--color-neon);
-  animation: glitch-a 3.6s infinite steps(1);
-}
-.glitch::after {
-  color: var(--color-pink);
-  animation: glitch-b 3.6s infinite steps(1);
-}
-@keyframes glitch-a {
-  0%,
-  90%,
-  100% {
-    transform: translate(0);
-    clip-path: inset(0 0 100% 0);
-  }
-  91% {
-    transform: translate(-6px, 1px);
-    clip-path: inset(12% 0 58% 0);
-  }
-  94% {
-    transform: translate(5px, -2px);
-    clip-path: inset(62% 0 8% 0);
-  }
-  97% {
-    transform: translate(-3px, 0);
-    clip-path: inset(30% 0 40% 0);
-  }
-}
-@keyframes glitch-b {
-  0%,
-  90%,
-  100% {
-    transform: translate(0);
-    clip-path: inset(100% 0 0 0);
-  }
-  92% {
-    transform: translate(6px, -1px);
-    clip-path: inset(48% 0 22% 0);
-  }
-  95% {
-    transform: translate(-5px, 2px);
-    clip-path: inset(6% 0 70% 0);
-  }
-  98% {
-    transform: translate(3px, 0);
-    clip-path: inset(74% 0 4% 0);
-  }
+  text-shadow: none;
 }
 
 /* ---------- ambient motion ---------- */
-.crt {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
-    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
-  animation: crt-flicker 6s infinite;
-}
-.crt::after {
-  /* slow rolling bright band, like a refresh line drifting down the tube */
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 22vh;
-  top: -22vh;
-  background: linear-gradient(to bottom, transparent, rgba(124, 232, 210, 0.05), transparent);
-  animation: crt-roll 9s linear infinite;
-}
-@keyframes crt-roll {
-  to {
-    transform: translateY(150vh);
-  }
-}
-@keyframes crt-flicker {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  46% {
-    opacity: 0.94;
-  }
-  48% {
-    opacity: 1;
-  }
-  73% {
-    opacity: 0.97;
-  }
-}
 
 @keyframes grid-scroll {
   to {
@@ -283,21 +171,71 @@ body {
 }
 
 /* The editor is stock third-party UI: give it a neon bezel instead of restyling it. */
+/* The editor is stock third-party UI: frame it with a soft card instead of restyling it. */
 .bezel {
   position: relative;
-  background: #050609;
-  outline: 1px solid rgba(45, 226, 230, 0.35);
+  background: #06070b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+/* Glass card: the one panel style used for every block of instructions. */
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 16px;
+  background: rgba(9, 11, 18, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 14px;
+  padding: 0.85rem 1.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #12060f;
+  background: linear-gradient(135deg, #ff5fb0 0%, #ff9a3c 100%);
   box-shadow:
-    0 0 0 1px rgba(255, 45, 149, 0.25),
-    0 0 30px rgba(255, 45, 149, 0.18),
-    inset 0 0 40px rgba(0, 0, 0, 0.6);
+    0 8px 26px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.22) inset;
+  transition:
+    filter 0.15s,
+    box-shadow 0.15s;
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow:
+    0 10px 34px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.35) inset;
+}
+.btn-primary:disabled {
+  opacity: 0.32;
+  filter: grayscale(0.5);
+  cursor: not-allowed;
+}
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  transition: background 0.15s;
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.13);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .crt,
-  .crt::after,
-  .glitch::before,
-  .glitch::after,
   .caret::after,
   .blip {
     animation: none !important;

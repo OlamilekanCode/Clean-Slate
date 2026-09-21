@@ -230,7 +230,7 @@ function AnalysisBody({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="absolute left-3 top-2 z-10 text-[10px] tracking-[0.3em] text-white/50">
+          <div className="absolute left-3 top-2 z-10 text-[12.5px] tracking-[0.14em] text-white/70">
             {measurement ? 'FILE AS COMMITTED' : 'FILE AS IT WAS'}
           </div>
           <Outlines
@@ -244,7 +244,7 @@ function AnalysisBody({
 
         <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
           <div>
-            <div className="text-[10px] tracking-[0.4em] text-neon">
+            <div className="text-[12.5px] tracking-[0.2em] text-neon">
               EXHIBIT {String(spec.number).padStart(2, '0')} · FORENSIC ANALYSIS
             </div>
             <motion.h2
@@ -258,7 +258,7 @@ function AnalysisBody({
           </div>
 
           {timedOut && (
-            <div className="border border-breach bg-breach/10 p-2 text-[12px] text-breach">
+            <div className="border border-breach bg-breach/10 p-2 text-[14px] text-breach">
               CLOCK EXPIRED. Your save landed first. Everything after this syncs as it is.
             </div>
           )}
@@ -268,7 +268,7 @@ function AnalysisBody({
               {rows.slice(0, shown).map((r) => (
                 <motion.div
                   key={r.key}
-                  className="relative overflow-hidden border bg-black/70 p-3 backdrop-blur-sm"
+                  className="card relative overflow-hidden p-3.5"
                   style={{ borderColor: `${TONE_COLOR[r.tone]}88` }}
                   initial={{ opacity: 0, x: 60, skewX: -8 }}
                   animate={{ opacity: 1, x: 0, skewX: 0 }}
@@ -286,11 +286,11 @@ function AnalysisBody({
                   />
                   <div className="flex items-baseline justify-between gap-3 pl-2">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-[9px] tracking-[0.3em] text-white/45">{r.kind}</span>
-                      <span className="text-[13px] font-bold uppercase text-white">{r.title}</span>
+                      <span className="text-[12px] tracking-[0.14em] text-white/65">{r.kind}</span>
+                      <span className="text-[15px] font-bold uppercase text-white">{r.title}</span>
                     </div>
                     <span
-                      className="font-display text-[19px] leading-none"
+                      className="font-display text-[22px] leading-none"
                       style={{
                         color: TONE_COLOR[r.tone],
                         textShadow: `0 0 12px ${TONE_COLOR[r.tone]}`,
@@ -299,9 +299,7 @@ function AnalysisBody({
                       {r.verdict}
                     </span>
                   </div>
-                  <div className="mt-1 pl-2 text-[11.5px] leading-snug text-white/65">
-                    {r.detail}
-                  </div>
+                  <div className="mt-1 pl-2 text-[14px] leading-snug text-white/80">{r.detail}</div>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -311,7 +309,7 @@ function AnalysisBody({
           <AnimatePresence>
             {done && (
               <motion.div
-                className="mt-1 grid grid-cols-2 gap-3 border border-white/20 bg-black/75 p-3"
+                className="card mt-1 grid grid-cols-2 gap-3 p-4"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
               >
@@ -331,7 +329,7 @@ function AnalysisBody({
               type="button"
               onClick={onNext}
               disabled={!done}
-              className="font-display border-2 border-neon bg-black/70 px-8 py-3 text-xl tracking-[0.2em] text-white disabled:opacity-25"
+              className="btn-primary px-9 py-3.5 text-lg"
               style={{ boxShadow: '0 0 24px rgba(45,226,230,0.4)' }}
               whileHover={done ? { scale: 1.06 } : {}}
               whileTap={done ? { scale: 0.96 } : {}}
@@ -342,7 +340,7 @@ function AnalysisBody({
               <button
                 type="button"
                 onClick={onSkip}
-                className="text-[11px] tracking-[0.25em] text-white/50 underline"
+                className="text-[13.5px] tracking-[0.12em] text-white/70 underline"
               >
                 SKIP REVEAL
               </button>
@@ -370,19 +368,19 @@ function Meter({
   const worse = good === 'down' ? delta > 0.05 : delta < -0.05;
   return (
     <div>
-      <div className="text-[9px] tracking-[0.3em] text-white/50">{label}</div>
+      <div className="text-[12px] tracking-[0.14em] text-white/70">{label}</div>
       <div className="flex items-baseline gap-2">
-        <span className="font-display text-3xl text-white/45 line-through decoration-white/25">
+        <span className="font-display text-3xl text-white/65 line-through decoration-white/25">
           {Math.round(from)}
         </span>
-        <span className="text-white/40">→</span>
+        <span className="text-white/60">→</span>
         <AnimatedNumber
           value={to}
           duration={1.1}
           className={`font-display text-4xl ${better ? 'neon-cyan' : worse ? 'text-breach' : 'text-white'}`}
         />
         <span
-          className={`text-[12px] ${better ? 'text-neon' : worse ? 'text-breach' : 'text-white/50'}`}
+          className={`text-[14px] ${better ? 'text-neon' : worse ? 'text-breach' : 'text-white/70'}`}
         >
           {Math.abs(delta) < 0.05
             ? 'no change'

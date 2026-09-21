@@ -30,21 +30,21 @@ export default function Chrome({ index, total, clockMs, running, heat, suspicion
   const risk = Math.min(100, suspicion);
 
   return (
-    <header className="relative z-40 flex h-[58px] shrink-0 items-center gap-5 border-b border-pink/30 bg-black/70 px-4 backdrop-blur-sm">
+    <header className="relative z-40 flex h-[64px] shrink-0 items-center gap-5 border-b border-white/10 bg-[#07090c]/75 px-5 backdrop-blur-xl">
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
         style={{ background: 'linear-gradient(90deg, #ff2d95, #ffd166, #2de2e6)' }}
       />
 
       {/* wordmark */}
-      <div className="font-display text-[22px] leading-none tracking-wide">
+      <div className="font-display text-[25px] leading-none tracking-wide">
         <span className="neon-cyan">CLEAN</span>
         <span className="mx-1 text-pink">/</span>
         <span className="neon-pink">SLATE</span>
       </div>
 
       {/* exhibit counter */}
-      <div className="flex items-center gap-2 text-[11px] tracking-[0.2em] text-white/60">
+      <div className="flex items-center gap-2 text-[13.5px] tracking-[0.12em] text-white/78">
         <span>EXHIBIT</span>
         <span className="text-sm text-white">
           {String(Math.min(index + 1, total)).padStart(2, '0')} / {String(total).padStart(2, '0')}
@@ -53,7 +53,7 @@ export default function Chrome({ index, total, clockMs, running, heat, suspicion
           {Array.from({ length: total }, (_, i) => (
             <motion.span
               key={i}
-              className="block h-[6px] w-7 skew-x-[-20deg]"
+              className="block h-[6px] w-8 rounded-full"
               animate={{
                 backgroundColor:
                   i < index ? '#2de2e6' : i === index ? '#ff2d95' : 'rgba(255,255,255,0.16)',
@@ -74,11 +74,11 @@ export default function Chrome({ index, total, clockMs, running, heat, suspicion
 
       {/* clock */}
       <div className="flex flex-col items-end leading-none">
-        <span className="mb-1 text-[9px] tracking-[0.3em] text-white/50">
+        <span className="mb-1 text-[12px] tracking-[0.14em] text-white/70">
           {running ? 'CLOCK RUNNING' : 'CLOCK PAUSED'}
         </span>
         <span
-          className={`font-display text-[30px] tabular-nums ${clockClass} ${critical && running ? 'blip' : ''}`}
+          className={`font-display text-[36px] tabular-nums ${clockClass} ${critical && running ? 'blip' : ''}`}
           style={{ opacity: running ? 1 : 0.6 }}
         >
           {formatClock(clockMs)}
@@ -88,8 +88,8 @@ export default function Chrome({ index, total, clockMs, running, heat, suspicion
       <div className="h-8 w-px bg-white/15" />
 
       {/* heat */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between text-[9px] tracking-[0.3em] text-white/50">
+      <div className="flex min-w-[170px] flex-col gap-1">
+        <div className="flex items-center justify-between gap-4 text-[12px] tracking-[0.14em] text-white/70">
           <span>WANTED</span>
           <span className="text-white">
             HEAT <AnimatedNumber value={heat} />
@@ -101,14 +101,14 @@ export default function Chrome({ index, total, clockMs, running, heat, suspicion
       <div className="h-8 w-px bg-white/15" />
 
       {/* suspicion */}
-      <div className="w-[190px]">
-        <div className="mb-1 flex items-center justify-between text-[9px] tracking-[0.3em] text-white/50">
+      <div className="w-[220px]">
+        <div className="mb-1 flex items-center justify-between text-[12px] tracking-[0.14em] text-white/70">
           <span>TAMPERING RISK</span>
           <span className={risk >= 40 ? 'text-breach' : 'text-white'}>
             <AnimatedNumber value={risk} />
           </span>
         </div>
-        <div className="relative h-[10px] border border-white/25 bg-black/60">
+        <div className="relative h-[8px] overflow-hidden rounded-full bg-white/12">
           <motion.div
             className="absolute inset-y-0 left-0"
             style={{ background: 'linear-gradient(90deg, #2de2e6, #ffd166 55%, #ff3b4e)' }}

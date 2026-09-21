@@ -57,7 +57,7 @@ export default function Tracer() {
   });
 
   return (
-    <div className="grid h-full grid-cols-[minmax(0,1fr)_420px] gap-px bg-[#1c2427] text-[12px]">
+    <div className="grid h-full grid-cols-[minmax(0,1fr)_420px] gap-px bg-[#1c2427] text-[14px]">
       <div className="bg-bg">
         <Editor
           image={frame.dataUrl}

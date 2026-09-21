@@ -72,7 +72,7 @@ export default function ViceBackdrop({ mode = 'full', className = '' }: Props) {
     <div
       aria-hidden
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
-      style={{ opacity: dim ? 0.55 : 1 }}
+      style={{ opacity: dim ? 0.42 : 1 }}
     >
       {/* sky */}
       <div
@@ -194,7 +194,7 @@ export default function ViceBackdrop({ mode = 'full', className = '' }: Props) {
         className="absolute inset-0"
         style={{
           background: dim
-            ? 'radial-gradient(ellipse at 50% 40%, rgba(7,9,12,0.55), rgba(7,9,12,0.92))'
+            ? 'radial-gradient(ellipse at 50% 40%, rgba(7,9,12,0.72), rgba(7,9,12,0.96))'
             : 'radial-gradient(ellipse at 50% 58%, transparent 30%, rgba(7,3,15,0.7) 100%)',
         }}
       />

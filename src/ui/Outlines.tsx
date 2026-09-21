@@ -30,7 +30,7 @@ export default function Outlines({
   className?: string;
 }) {
   const stroke = Math.max(2, W / 420);
-  const font = Math.max(13, W / 62);
+  const font = Math.max(17, W / 50);
   return (
     <div className={`relative ${className}`} style={{ aspectRatio: `${W} / ${H}` }}>
       <img
@@ -51,6 +51,8 @@ export default function Outlines({
             const w = r.w * W;
             const h = r.h * H;
             const pad = stroke * 1.5;
+            const labelW = o.label.length * font * 0.62 + font;
+            const labelX = Math.max(2, Math.min(x - pad, W - labelW - 2));
             const above = y - pad - font * 1.6 >= 2;
             const labelY = above ? y - pad - font * 1.6 : Math.min(H - font * 1.6, y + h + pad + 2);
             return (
@@ -78,7 +80,7 @@ export default function Outlines({
                   strokeDasharray={o.dashed ? '0.02 0.012' : '1'}
                   strokeDashoffset={o.dashed ? 0 : 1}
                   style={{
-                    filter: `drop-shadow(0 0 ${stroke * 2}px ${o.color})`,
+                    filter: `drop-shadow(0 1px 2px rgba(0,0,0,0.7))`,
                     animation: o.dashed
                       ? `fade-in 0.6s ease-out ${o.delay}s both`
                       : `draw-on 0.7s cubic-bezier(.2,.8,.2,1) ${o.delay}s forwards`,
@@ -88,16 +90,17 @@ export default function Outlines({
                 {i === 0 && (
                   <g style={{ animation: `fade-in 0.4s ease-out ${o.delay + 0.5}s both` }}>
                     <rect
-                      x={Math.max(2, x - pad)}
+                      x={labelX}
                       y={labelY}
-                      width={o.label.length * font * 0.62 + font}
+                      width={labelW}
                       height={font * 1.5}
-                      fill="rgba(4,4,10,0.86)"
+                      fill="rgba(6,7,12,0.92)"
+                      rx={font * 0.28}
                       stroke={o.color}
                       strokeWidth={stroke / 2}
                     />
                     <text
-                      x={Math.max(2, x - pad) + font * 0.5}
+                      x={labelX + font * 0.5}
                       y={labelY + font * 1.08}
                       fill={o.color}
                       fontSize={font}
