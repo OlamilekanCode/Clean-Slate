@@ -95,16 +95,21 @@ export function transferredToWitness(results: Results): number {
  * Endings, evaluated in this order:
  *   TAMPERING    suspicion >= 100                       instant end mid-run
  *   CLEAN SLATE  heat <= 5 and suspicion < 40           0 stars
- *   SYNCED       clock expired and heat > 60            6 stars, nothing changed
+ *   SYNCED       heat > 60 and (clock expired, or nothing changed at all)   6 stars
  *   PARTIAL      otherwise                              min(5, max(1, ceil(heat / 100 * 6)))
  * Partial is capped at 5 because six is reserved for SYNCED.
+ *
+ * "Nothing changed" means no heat came off and no seal was disturbed. A player who skips every exhibit, or
+ * saves them all untouched, has left the file exactly as it was, so it syncs as it was: six stars, not a
+ * PARTIAL that pretends they engaged.
  */
 export function resolveEnding(heat: number, suspicion: number, expired: boolean): Ending {
   // Tampering leaves you at the top of the wanted scale with a new felony on the sheet; the spec gives no
   // star count for it, so it shows the full six.
   if (suspicion >= 100) return { kind: 'TAMPERING', stars: 6 };
   if (heat <= 5 && suspicion < 40) return { kind: 'CLEAN_SLATE', stars: 0 };
-  if (expired && heat > 60) return { kind: 'SYNCED', stars: 6 };
+  const untouched = heat >= TOTAL_HEAT - 1e-9 && suspicion === 0;
+  if ((expired || untouched) && heat > 60) return { kind: 'SYNCED', stars: 6 };
   // The epsilon stops float noise (e.g. 3.0000000000000004) from tipping a whole star up.
   const stars = Math.min(5, Math.max(1, Math.ceil((heat / TOTAL_HEAT) * 6 - 1e-9)));
   return { kind: 'PARTIAL', stars };

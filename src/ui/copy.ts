@@ -105,7 +105,7 @@ export const VERDICT_COPY = {
   SYNCED: {
     title: 'SYNCED',
     sub: 'Nothing changed.',
-    body: 'The clock ran out with the evidence still standing. Everything went to the archive exactly as it was.',
+    body: 'The evidence went to the archive exactly as it was. Nothing on the file was changed.',
   },
   PARTIAL: {
     title: 'PARTIAL',

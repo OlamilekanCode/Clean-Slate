@@ -296,7 +296,7 @@ describe('endings', () => {
   });
 
   it('never prints six stars for a run that engaged', () => {
-    assert.equal(resolveEnding(100, 0, false).stars, 5, 'capped at five');
+    assert.equal(resolveEnding(99, 0, false).stars, 5, 'capped at five');
     assert.equal(resolveEnding(90, 0, false).stars, 5);
     assert.equal(resolveEnding(50, 0, false).stars, 3);
     assert.equal(resolveEnding(20, 0, false).stars, 2);
@@ -563,5 +563,55 @@ describe('the full five-exhibit run', () => {
     );
     assert.deepEqual(r.breached, ['channel-bug', 'ticker']);
     assert.equal(r.suspicionAdded, 60);
+  });
+});
+
+describe('nothing changed', () => {
+  const skipEverything = (): GameState => {
+    let s = boot();
+    for (let i = 0; i < SLICE.length; i++) {
+      for (const a of [
+        { type: 'START_EDIT' },
+        { type: 'EDITOR_READY' },
+        { type: 'SKIP' },
+        { type: 'NEXT' },
+      ] as Action[])
+        s = reducer(s, a);
+    }
+    return s;
+  };
+
+  it('is SYNCED, six stars, when every exhibit is skipped without the clock running out', () => {
+    const s = skipEverything();
+    assert.equal(s.timedOut, false);
+    assert.equal(heatOf(s.results), 100);
+    assert.deepEqual(s.ending, { kind: 'SYNCED', stars: 6 });
+  });
+
+  it('is SYNCED when every exhibit is saved with no edits at all', () => {
+    let s = boot();
+    s = next(edit(s, cov('cctv')));
+    s = next(edit(s, cov('anpr')));
+    s = next(edit(s, cov('witness')));
+    assert.equal(s.ending?.kind, 'SYNCED');
+  });
+
+  it('stays a partial once the player has actually taken heat off', () => {
+    let s = boot();
+    s = next(edit(s, cov('cctv', { face: 1 })));
+    s = next(edit(s, cov('anpr')));
+    s = next(edit(s, cov('witness')));
+    assert.equal(s.ending?.kind, 'PARTIAL');
+    assert.ok(heatOf(s.results) < 100);
+  });
+
+  it('is not "nothing changed" if a seal was disturbed, even with no heat removed', () => {
+    const e = resolveEnding(100, 30, false);
+    assert.equal(e.kind, 'PARTIAL');
+    assert.equal(e.stars, 5);
+  });
+
+  it('still needs heat above 60 to sync', () => {
+    assert.equal(resolveEnding(60, 0, true).kind, 'PARTIAL');
   });
 });
