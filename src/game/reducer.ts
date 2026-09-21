@@ -108,7 +108,9 @@ export function resolveEnding(heat: number, suspicion: number, expired: boolean)
   // star count for it, so it shows the full six.
   if (suspicion >= 100) return { kind: 'TAMPERING', stars: 6 };
   if (heat <= 5 && suspicion < 40) return { kind: 'CLEAN_SLATE', stars: 0 };
-  const untouched = heat >= TOTAL_HEAT - 1e-9 && suspicion === 0;
+  // No heat came off means no star comes off, whatever else the player did: damaging only a seal earns
+  // suspicion, never a lower wanted level.
+  const untouched = heat >= TOTAL_HEAT - 1e-9;
   if ((expired || untouched) && heat > 60) return { kind: 'SYNCED', stars: 6 };
   // The epsilon stops float noise (e.g. 3.0000000000000004) from tipping a whole star up.
   const stars = Math.min(5, Math.max(1, Math.ceil((heat / TOTAL_HEAT) * 6 - 1e-9)));

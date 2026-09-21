@@ -596,6 +596,16 @@ describe('nothing changed', () => {
     assert.equal(s.ending?.kind, 'SYNCED');
   });
 
+  it('keeps six stars when only a seal was damaged and no heat came off', () => {
+    let s = boot();
+    s = next(edit(s, cov('cctv', {}, { timecode: 1 })));
+    s = next(edit(s, cov('anpr')));
+    s = next(edit(s, cov('witness')));
+    assert.equal(heatOf(s.results), 100);
+    assert.equal(suspicionOf(s.results), 30);
+    assert.deepEqual(s.ending, { kind: 'SYNCED', stars: 6 });
+  });
+
   it('stays a partial once the player has actually taken heat off', () => {
     let s = boot();
     s = next(edit(s, cov('cctv', { face: 1 })));
@@ -605,10 +615,12 @@ describe('nothing changed', () => {
     assert.ok(heatOf(s.results) < 100);
   });
 
-  it('is not "nothing changed" if a seal was disturbed, even with no heat removed', () => {
-    const e = resolveEnding(100, 30, false);
-    assert.equal(e.kind, 'PARTIAL');
-    assert.equal(e.stars, 5);
+  it('never lowers the wanted level when no heat came off, whatever the suspicion', () => {
+    for (const suspicion of [0, 30, 60, 99]) {
+      assert.deepEqual(resolveEnding(100, suspicion, false), { kind: 'SYNCED', stars: 6 });
+    }
+    // ...but a tampering charge still comes first
+    assert.equal(resolveEnding(100, 100, false).kind, 'TAMPERING');
   });
 
   it('still needs heat above 60 to sync', () => {

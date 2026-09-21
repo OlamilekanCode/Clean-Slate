@@ -95,8 +95,8 @@ export const VERDICT_COPY = {
   },
   SYNCED: {
     title: 'BUSTED',
-    sub: 'You changed nothing.',
-    body: 'Every file reached the archive exactly as it was. Six stars, and they know where to find you.',
+    sub: 'Nothing you did helped.',
+    body: 'You took no heat off the files, so they reached the archive as good as untouched. Six stars, and they know where to find you.',
   },
   PARTIAL: {
     title: 'STILL WANTED',
