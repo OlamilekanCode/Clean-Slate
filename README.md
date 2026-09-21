@@ -135,7 +135,7 @@ wanted** (`PARTIAL`: 1–5 stars from remaining heat). A save and a timeout can 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm test         # 53 tests for the game logic, no browser needed
+npm test         # 54 tests for the game logic, no browser needed
 npm run build    # typecheck and production build
 ```
 
@@ -157,8 +157,8 @@ its targets and seals, drawn by the same code that painted them, so regions are 
     <td><img src="docs/screenshots/02-traffic-cam.jpg" alt="Exhibit 02: traffic camera"><br><sub>02 · ANPR traffic cam</sub></td>
   </tr>
   <tr>
+    <td><img src="docs/screenshots/03-police-report.jpg" alt="Exhibit 03: police report"><br><sub>03 · Police report</sub></td>
     <td><img src="docs/screenshots/04-news-broadcast.jpg" alt="Exhibit 04: news broadcast"><br><sub>04 · News broadcast</sub></td>
-    <td><img src="docs/screenshots/03-police-report.jpg" alt="Exhibit 03: police report" width="50%"><br><sub>03 · Police report</sub></td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/05-witness-photo.jpg" alt="Exhibit 05: witness photo" width="50%"><br><sub>05 · Witness photo (same car as 02)</sub></td>

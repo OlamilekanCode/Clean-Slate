@@ -34,6 +34,7 @@ export const EDITOR_OPTIONS = {
   translations: {
     en: {
       'image_editor.toolbar.save': 'SAVE FILE',
+      'image_editor.toolbar.cancel': 'Walk away',
       'image_editor.tools.shapes': 'Blackout',
       'image_editor.tools.stickers': 'Stickers',
       'image_editor.tools.draw': 'Scribble',
