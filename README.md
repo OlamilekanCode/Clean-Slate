@@ -10,8 +10,8 @@ photo. The [React Image Editor](https://github.com/unlayer/react-image-editor) i
 player makes is an edit in the editor, and the score comes from measuring exactly which pixels they changed.
 
 > **Status: playable.** The full loop works end to end in a real browser: boot, briefing, editing with the
-> clock, forensic analysis and verdict, across three exhibits (CCTV, traffic camera, witness photo), with all
-> four endings. Still to do: the police report and news broadcast in the run, and a public deployment.
+> clock, forensic analysis and verdict, across all five exhibits (CCTV, traffic camera, police report, news
+> broadcast, witness photo), with all four endings. Still to do: a public deployment.
 
 <table>
   <tr>
@@ -23,14 +23,20 @@ player makes is an edit in the editor, and the score comes from measuring exactl
     <td><img src="docs/screenshots/game-4-analysis.jpg" alt="Forensic analysis"><br><sub>Analysis: every region's cost or saving, and the linked car</sub></td>
   </tr>
   <tr>
+    <td><img src="docs/screenshots/game-7-report.jpg" alt="Analysis of the police report"><br><sub>Analysis: the police report, a portrait page</sub></td>
     <td><img src="docs/screenshots/game-5-verdict-clean-slate.jpg" alt="Verdict: clean slate"><br><sub>Verdict: CLEAN SLATE</sub></td>
+  </tr>
+  <tr>
     <td><img src="docs/screenshots/game-6-verdict-tampering.jpg" alt="Verdict: tampering charge"><br><sub>Verdict: TAMPERING CHARGE</sub></td>
+    <td></td>
   </tr>
 </table>
 
-The look is Vice City at dusk over a police terminal: neon type with a glitch, a striped sun, palms and skyline,
-a scrolling grid, CRT scanlines, siren lights when the clock or the risk gets dangerous, and a wanted-stars HUD
-that tracks heat. All of it is vector art and CSS drawn in code, so there are no image assets.
+The look is a clean, modern interface over Vice City at dusk: soft glass cards and a bold system sans for
+everything you have to read, with the striped sun, palms, skyline and scrolling grid kept behind it, siren lights
+when the clock or the risk gets dangerous, and a wanted-stars HUD that tracks heat. Instructions and evidence
+are kept free of scanlines and glow so they stay easy to read. All of it is vector art and CSS drawn in code,
+so there are no image assets, and it uses system fonts only, so nothing can fail to load.
 
 ## The idea
 
@@ -83,12 +89,19 @@ are untouched._
 - **One global threshold does not work.** At the starting value, an untouched news frame scored one of its
   seals over the breach line, so a player who changed nothing would be charged. Raising the threshold fixed
   that but then gave only about half credit for _fully_ covering a dark target, because black over
-  near-black barely changes. The threshold is now set per exhibit from 45 real-editor test runs (drags,
-  brush strokes, translucent overlays, seal nicks, whole-frame blackouts) on the three slice frames.
+  near-black barely changes. The threshold is now set per exhibit from 77 real-editor test runs (drags,
+  brush strokes, translucent overlays, seal nicks, whole-frame blackouts) across the CCTV, traffic camera,
+  police report, news broadcast and witness photo.
+- **Seals get a stricter threshold than targets.** The two mistakes are not symmetric: under-crediting a
+  fully opaque edit is unfair to the player, but charging a seal breach for an edit that never touched it is
+  worse. The news broadcast needs a sensitive threshold for its cream-on-navy strap but a robust one for its
+  crisp white-on-red channel bug, so seals can use their own value (0.002 untouched cover at 48, against
+  0.034 at the target threshold of 32, with the breach line at 0.05).
 - **Known limit.** Scoring by how much pixels changed cannot tell a readable translucent overlay from an
   opaque one, so a 50% overlay can still earn credit. The rule the player is given is: cover it opaquely.
-- **Not yet calibrated.** The police report and news broadcast keep a conservative default threshold until
-  they are measured the same way.
+- **Loading is handled.** If the editor's CDN is blocked or slow, the player gets a clear screen with Try
+  again and Skip this exhibit instead of a spinner, the clock stays held, and a retry goes through the same
+  version-pinned loader so a recovery cannot change the export the scorer is calibrated on.
 
 ## The evidence
 
@@ -137,7 +150,7 @@ A save and a timeout can never score an exhibit twice, and a save already in fli
 ```bash
 npm install
 npm run dev      # the game at http://localhost:5173
-npm test         # 42 tests for the game logic, no browser needed
+npm test         # 48 tests for the game logic, no browser needed
 npm run build    # typecheck and production build
 ```
 
@@ -178,7 +191,8 @@ Built with Vite, React 18, TypeScript and Tailwind v4, with `@unlayer/react-imag
 - [x] Evidence generators, editor integration, pixel scoring and calibration
 - [x] Game state machine with heat, suspicion, the car chain and all four endings
 - [x] Game screens: boot, brief, edit with the clock, analysis, verdict
-- [ ] Police report and news broadcast added to the run (calibrate their thresholds first)
+- [x] Police report and news broadcast calibrated and added to the run
+- [x] A modern, readable look, and reliable editor loading with a way out
 - [ ] Deployed build and a short capture
 
 ## Disclaimer
