@@ -29,7 +29,7 @@ player makes is an edit in the editor, and the score comes from measuring exactl
 <table>
   <tr>
     <td><img src="docs/screenshots/game-1-boot.jpg" alt="Boot screen"><br><sub>Boot: trip the alarm to start the clock</sub></td>
-    <td><img src="docs/screenshots/game-2-brief.jpg" alt="Briefing"><br><sub>Brief: what to conceal, what to leave alone</sub></td>
+    <td><img src="docs/screenshots/game-2-brief.jpg" alt="Briefing"><br><sub>Brief: what to hide, what to leave alone</sub></td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/game-3-edit.jpg" alt="Editing in the React Image Editor"><br><sub>Edit: the React Image Editor is the game</sub></td>
@@ -58,12 +58,12 @@ actual editor being driven, the actual save being scored, and the actual verdict
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/gifs/clean-slate.gif" alt="A successful clear: CLEAN SLATE"><br><b>A successful clear.</b> Cover every target opaquely, leave every seal alone, and the file is clean: heat near zero, no stars, <b>CLEAN SLATE</b>.</td>
-    <td width="50%"><img src="docs/gifs/tampering.gif" alt="Tripping the tamper seals: tampering charge"><br><b>Tripping the tamper seals.</b> Redact the integrity seals instead of the evidence and suspicion climbs with each breach. Two exhibits in, it maxes and the run ends at once with a <b>tampering charge</b>.</td>
+    <td width="50%"><img src="docs/gifs/clean-slate.gif" alt="A successful clear: CLEAN SLATE"><br><b>A successful clear.</b> Cover every target solid, leave every proof stamp alone, and the file is clean: heat near zero, no stars, <b>CLEAN SLATE</b>.</td>
+    <td width="50%"><img src="docs/gifs/tampering.gif" alt="Messing with the proof stamps: tampering charge"><br><b>Messing with the proof stamps.</b> Black out the stamps instead of the evidence and suspicion climbs with each one. Two exhibits in, it maxes and the run ends at once with a <b>tampering charge</b>.</td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/gifs/not-fully-clear.gif" alt="Not fully clear: partial"><br><b>Not fully clear.</b> Four exhibits cleared perfectly, but the witness photo is left alone. Hiding the car in the traffic capture moved its heat there instead of removing it, so it is still on the file: <b>PARTIAL</b>, one star.</td>
-    <td width="50%"><img src="docs/gifs/timeout.gif" alt="Running out the clock: synced"><br><b>Running out the clock.</b> Do nothing and the five-minute clock expires. Everything syncs to the archive untouched: <b>SYNCED</b>, six stars.</td>
+    <td width="50%"><img src="docs/gifs/not-fully-clear.gif" alt="Not fully clear: still wanted"><br><b>Not fully clear.</b> Four exhibits cleared perfectly, but the witness photo is left alone. Hiding the car in the traffic capture moved its heat there instead of removing it, so it is still on the file: <b>STILL WANTED</b>, one star.</td>
+    <td width="50%"><img src="docs/gifs/timeout.gif" alt="Running out the clock: busted"><br><b>Running out the clock.</b> Do nothing and the five-minute clock expires. Every file goes to the archive untouched: <b>BUSTED</b>, six stars.</td>
   </tr>
 </table>
 
@@ -71,14 +71,14 @@ actual editor being driven, the actual save being scored, and the actual verdict
 
 Every exhibit is a piece of evidence with three kinds of region:
 
-- **Targets** are what identifies you: a face, a plate, a name, a car. Conceal one and **heat** drops.
-- **Integrity seals** are what proves the file is genuine: a timecode, a camera ID, a custody hash, a
-  channel bug. Touch one and **suspicion** rises.
+- **Targets** are what identifies you: a face, a plate, a name, a car. Hide one and **heat** drops.
+- **Proof stamps** (the code calls them integrity seals) show the file is genuine: a timecode, a camera ID,
+  a custody hash, a channel logo. Touch one and **suspicion** rises.
 - **Collateral** is everything else. Change too much of the frame and suspicion rises.
 
 Heat starts at 100. Clear it to 5 or below without pushing suspicion to 40 and you reach **CLEAN SLATE**:
 zero stars, you were never there. Push suspicion to 100 and the run ends immediately with a new felony. Run
-out the clock with the evidence untouched and everything syncs: still six stars.
+out the clock with the evidence untouched and every file goes to the archive: still six stars, and you are busted.
 
 There is one twist. Hiding the car in the traffic-camera capture is what makes it incriminating in the
 witness photo: its heat **transfers** to that exhibit instead of disappearing, and you only remove it by
@@ -90,8 +90,8 @@ The editor is not decoration; the whole game reads its output.
 
 - **Locked-down toolset.** Crop, resize, filter and frame are switched off, because each would change the
   output dimensions or write pixels everywhere and break the comparison against the original. Draw, shapes,
-  stickers and text stay on, renamed for the fiction: **Retouch**, **Redact**, **Overlay**, **Relabel**, with
-  the save button renamed **COMMIT TO FILE**. It uses the dark theme and is docked left so it reads as a
+  stickers and text stay on, renamed for the fiction: **Scribble**, **Blackout**, **Stickers**, **Write**, with
+  the save button renamed **SAVE FILE**. It uses the dark theme and is docked left so it reads as a
   module of the terminal.
 - **Options at module scope.** The options object is a module-level constant. Deeply-equal options objects
   can still produce different keys and force a full remount, which destroys the canvas and the undo history
@@ -171,7 +171,7 @@ target's rects are grouped: the fragments of one car body are unioned (so a thin
 whole car), but the witness photo's car plate is its own group, because a legible plate is a separate clue.
 
 The endings resolve in order: **Tampering** (suspicion ≥ 100), **CLEAN SLATE** (heat ≤ 5 and suspicion < 40),
-**Synced** (heat above 60 and either the clock expired or nothing changed at all, six stars) and **Partial** (1–5 stars from remaining heat).
+**Busted** (internally `SYNCED`: heat above 60 and either the clock expired or nothing changed at all, six stars) and **Still wanted** (internally `PARTIAL`: 1–5 stars from remaining heat).
 A save and a timeout can never score an exhibit twice, and a save already in flight beats the clock.
 
 ## Run it
@@ -187,7 +187,7 @@ Handy URLs while developing:
 
 - `/?clock=15` shortens the five-minute clock to 15 seconds, to see the timeout ending.
 - `/?tracer` opens the calibration harness. `/?frame=1` to `/?frame=5` loads a specific exhibit in it: press
-  **COMMIT TO FILE** with no edits to measure the export noise for that frame, or draw an edit and read the
+  **SAVE FILE** with no edits to measure the export noise for that frame, or draw an edit and read the
   per-region coverage.
 
 ## Project layout
