@@ -69,7 +69,8 @@ export const HANDLER: Record<ExhibitId, { line: string; extra?: string }> = {
 
 /** What the handler says when a target lands short of full coverage. */
 export function coverageVerdict(cover: number): { label: string; detail: string } {
-  const pct = Math.round(cover * 100);
+  // Rounded down below full credit, so a 74.6% cover never reads as "75% covered, 75% needed".
+  const pct = cover >= 0.75 ? Math.round(cover * 100) : Math.floor(cover * 100);
   if (cover >= 0.75) return { label: 'CONCEALED', detail: `${pct}% covered` };
   if (cover >= 0.4)
     return { label: 'PARTIAL', detail: `${pct}% covered · 75% needed for full credit` };

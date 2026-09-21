@@ -116,7 +116,7 @@ function AnalysisBody({
         tone: t.credit >= 0.999 ? 'good' : t.credit > 0 ? 'warn' : 'bad',
         outline: {
           rects: rectsOf(t.id, frame.targets),
-          label: `${t.id.toUpperCase()} · ${Math.round(cover * 100)}%`,
+          label: `${t.id.toUpperCase()} · ${cover >= 0.75 ? Math.round(cover * 100) : Math.floor(cover * 100)}%`,
         },
       });
     }
